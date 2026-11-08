@@ -1,0 +1,31 @@
+{
+  "name": "@hatch/ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Human editor: canvas preview, layer tree, inspector, hatch and composition controls, and export panel (specification sections 11 and 23).",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:smoke": "pnpm run build && playwright test"
+  },
+  "dependencies": {
+    "@hatch/agent": "workspace:*",
+    "@hatch/core": "workspace:*",
+    "@hatch/objects": "workspace:*",
+    "@hatch/renderer-svg": "workspace:*",
+    "@hatch/styles": "workspace:*",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "vite": "^8.3.6"
+  }
+}

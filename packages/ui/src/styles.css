@@ -1,0 +1,321 @@
+/*
+ * The stylesheet of the editor (task T026, specification sections 11 and
+ * 23). The page mirrors the artwork it edits: warm paper, dark ink, and
+ * quiet chrome that stays out of the way of the canvas.
+ */
+
+:root {
+  --paper: #f6f1e7;
+  --ink: #26221e;
+  --ink-soft: #3a342e;
+  --line: #d8d0c0;
+  --panel: #fffdf8;
+  --accent: #b0452e;
+  --error: #8a1f1f;
+  font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+/* The toolbar and the error bar. */
+
+.meta-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 16px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.meta-bar h1 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 8px 0 0;
+  align-self: center;
+  letter-spacing: 0.02em;
+}
+
+.error-bar {
+  margin: 0;
+  padding: 8px 16px;
+  background: #f7dede;
+  color: var(--error);
+  border-bottom: 1px solid #e3b8b8;
+  font-size: 14px;
+}
+
+/* The three-column layout: list, canvas, controls. */
+
+.layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr) 340px;
+  gap: 12px;
+  padding: 12px;
+  align-items: start;
+}
+
+.column {
+  display: grid;
+  gap: 12px;
+}
+
+/* Panels. */
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.panel h2 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  margin: 0 0 10px;
+}
+
+.panel h2 code {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.panel h3 {
+  font-size: 13px;
+  margin: 10px 0 6px;
+  color: var(--ink-soft);
+}
+
+/* Fields. */
+
+.field {
+  display: grid;
+  gap: 3px;
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+.field-label {
+  color: var(--ink-soft);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.field input,
+.field select,
+.field textarea,
+.fieldset textarea {
+  font: inherit;
+  font-size: 13px;
+  padding: 4px 6px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--ink);
+  width: 100%;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 10px;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  padding: 1px 0;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  align-items: center;
+}
+
+button {
+  font: inherit;
+  font-size: 13px;
+  padding: 5px 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--ink-soft);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+button.primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+button.danger {
+  color: var(--error);
+  border-color: #e3b8b8;
+}
+
+.button-label {
+  font-size: 13px;
+  padding: 5px 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.button-label input[type="file"] {
+  display: none;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin: 6px 0;
+}
+
+.error {
+  font-size: 13px;
+  color: var(--error);
+  margin: 6px 0 0;
+}
+
+/* The object list. */
+
+.object-list {
+  display: grid;
+  gap: 2px;
+}
+
+.layer-name {
+  margin: 10px 0 2px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+
+.object-row {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.object-row .object-select {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: left;
+  padding: 4px 8px;
+}
+
+.object-row .object-kind {
+  color: var(--ink-soft);
+}
+
+.object-row.selected .object-select {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.object-row .object-remove {
+  padding: 4px 8px;
+}
+
+.add-form {
+  border-top: 1px solid var(--line);
+  margin-top: 12px;
+  padding-top: 4px;
+}
+
+/* The canvas. */
+
+.canvas-panel {
+  display: grid;
+  gap: 10px;
+  min-height: 320px;
+}
+
+.canvas-frame {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  padding: 8px;
+  overflow: auto;
+}
+
+.canvas-frame svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.canvas-metrics {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.canvas-metrics code {
+  font-size: 11px;
+  background: var(--paper);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+/* The hatch families. */
+
+.family {
+  border-top: 1px solid var(--line);
+  padding: 4px 0;
+}
+
+.family summary {
+  font-size: 13px;
+  cursor: pointer;
+  padding: 3px 0;
+  color: var(--ink-soft);
+}
+
+.family[open] summary {
+  color: var(--ink);
+}
+
+/* The spec area. */
+
+.spec-json {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+}
+
+@media (max-width: 1100px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}

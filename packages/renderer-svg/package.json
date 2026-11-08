@@ -1,0 +1,28 @@
+{
+  "name": "@hatch/renderer-svg",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "SVG output: paths, patterns, strokes, debug layers, and metadata.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@hatch/agent": "workspace:*",
+    "@hatch/core": "workspace:*",
+    "@hatch/geometry": "workspace:*",
+    "@hatch/hatching": "workspace:*",
+    "@hatch/objects": "workspace:*",
+    "@hatch/styles": "workspace:*"
+  }
+}

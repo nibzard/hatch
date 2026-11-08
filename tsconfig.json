@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false
+  },
+  // One pass over every Node-side package. @hatch/ui is a browser
+  // application: its JSX and its DOM environment type in their own pass
+  // (packages/ui/tsconfig.json), which the workspace typecheck script
+  // runs beside this one, so the DOM globals never leak into the
+  // Node-side packages this pass covers.
+  //
+  // The per-package Vitest configs carry the per-test timeout budget of
+  // the slow suites, so they belong to this pass like any source file: a
+  // config that stops compiling fails the gate, not the test run.
+  "include": ["packages/*/src", "packages/*/test", "packages/*/vitest.config.ts", "tests"],
+  "exclude": ["packages/ui"]
+}

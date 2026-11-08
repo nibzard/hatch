@@ -1,0 +1,23 @@
+{
+  "name": "@hatch/styles",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Style presets, for example pastoral-v1 and urban-v1.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@hatch/core": "workspace:*"
+  }
+}

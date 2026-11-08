@@ -1,0 +1,7 @@
+# pnpm workspace definition.
+# Specification section 11 places the nine hatch packages under packages/.
+# The repository gates under tests/ are workspace projects too, so 'pnpm test'
+# and 'pnpm typecheck' cover them like any package.
+packages:
+  - "packages/*"
+  - "tests"

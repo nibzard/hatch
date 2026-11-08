@@ -1,0 +1,1459 @@
+{
+  "project": {
+    "name": "hatch",
+    "root": "/home/agent/hatch"
+  },
+  "schema_version": 1,
+  "source_files": [],
+  "goal": "Build hatch as a deterministic, style-aware vector scene compiler: structured JSON scene specifications pass through planning, geometry synthesis, and style application, and render as hatched illustrations built from region-based line fills, negative space, and a simplified contour grammar. SVG is the canonical output, with PNG and later PDF export, style presets, an object generator library, seeded determinism, per-stage instrumentation and traces, an agent-facing API, and a human editor, delivered in rounds V1 to V3 (specification sections 24 and 26).",
+  "tasks": [
+    {
+      "id": "T001",
+      "title": "Vendor the specification into the repository",
+      "priority": 1,
+      "status": "done",
+      "details": "Round 0 setup. The repository has no tracked files and no in-project requirements file; the specification lives outside the project at /home/agent/SPEC.md, so no project-relative source file can be listed at bootstrap. Copy it to docs/SPEC.md without content changes and commit it, so later rounds cite one in-repo requirements file. Acceptance: docs/SPEC.md exists in the repository; its SHA-256 equals 6acf65301608bc9aafb536f7fc92992ab3cba2806038a7b3953768e20c00cdd9, the checksum of /home/agent/SPEC.md verified on 2026-11-07; the commit message records the copy.",
+      "steps": [
+        "Copy /home/agent/SPEC.md to docs/SPEC.md.",
+        "Compute and compare the SHA-256 of both files.",
+        "Commit docs/SPEC.md with a short message."
+      ],
+      "files": [
+        ".gitignore",
+        "README.md",
+        "docs/SPEC.md"
+      ],
+      "tags": [
+        "round:0"
+      ],
+      "updated_at": "2026-11-07T01:16:04Z",
+      "unblock_when": "\"\""
+    },
+    {
+      "id": "T002",
+      "title": "Scaffold the pnpm workspace and toolchain",
+      "priority": 1,
+      "status": "done",
+      "details": "Round 0 setup. Create a pnpm workspace with TypeScript in strict mode and Vitest. Add package skeletons for the specification section 11 packages: core, geometry, hatching, objects, styles, renderer-svg, export, agent, and ui. Add a short README that lists the packages and the verify command. External prerequisites, verified on 2026-11-07: Node 24.18.0, pnpm 10.33.0, npm 11.16.0, and npm registry access, all present. Acceptance: from a fresh clone, pnpm install, pnpm build, and pnpm test all exit with status 0; tsc reports no errors.\n\nReview repair: Land the T002 pnpm workspace scaffold\nT001 now provides docs/SPEC.md, README.md, and base .gitignore. T002 still owns the pnpm workspace scaffold: pnpm-workspace.yaml over packages/*, package.json, tsconfig.base.json with strict mode and per-package configs, Vitest with one placeholder test per package, and the nine package skeletons from specification section 11. T002 acceptance (fresh clone: pnpm install, pnpm build, pnpm test all exit 0; tsc clean) is untested until then. The combined gate's package.json probe stays a no-op until package.json exists.\nEvidence: git ls-files shows only .gitignore, README.md, docs/SPEC.md; no package.json or packages/ exist. Combined verify command output: 'docs/SPEC.md: OK' then grep hit at README.md:30, exit 0.\n\nReview repair: Extend ignore rules as the toolchain lands\nBase ignore rules for generated output landed in commit 37e53f5 (node_modules/, dist/, build/, coverage/, *.tsbuildinfo, .vite/, test-results/, playwright-report/, *.log). When T002 adds the toolchain and T019 adds golden fixtures, extend the rules for any new generated paths (Vitest cache, per-package build output, example render scratch) and keep committed golden fixtures unignored.\nEvidence: Commit 37e53f5 adds .gitignore with nine generated-output rules; no build artifacts are tracked (git ls-files lists three source files).",
+      "steps": [
+        "Add pnpm-workspace.yaml that covers packages/*.",
+        "Add tsconfig.base.json with strict mode and per-package configs.",
+        "Add Vitest with one placeholder test per package skeleton.",
+        "Create the package skeletons named in specification section 11.",
+        "Add a README that lists the packages and the verify command.",
+        "Run pnpm install, pnpm build, and pnpm test."
+      ],
+      "depends_on": [
+        "T001"
+      ],
+      "files": [
+        "README.md",
+        "package.json",
+        "packages/",
+        "packages/agent/package.json",
+        "packages/agent/src/index.ts",
+        "packages/agent/test/agent.test.ts",
+        "packages/agent/tsconfig.build.json",
+        "packages/agent/tsconfig.json",
+        "packages/core/package.json",
+        "packages/core/src/index.ts",
+        "packages/core/test/core.test.ts",
+        "packages/core/tsconfig.build.json",
+        "packages/core/tsconfig.json",
+        "packages/export/package.json",
+        "packages/export/src/index.ts",
+        "packages/export/test/export.test.ts",
+        "packages/export/tsconfig.build.json",
+        "packages/export/tsconfig.json",
+        "packages/geometry/package.json",
+        "packages/geometry/src/index.ts",
+        "packages/geometry/test/geometry.test.ts",
+        "packages/geometry/tsconfig.build.json",
+        "packages/geometry/tsconfig.json",
+        "packages/hatching/package.json",
+        "packages/hatching/src/index.ts",
+        "packages/hatching/test/hatching.test.ts",
+        "packages/hatching/tsconfig.build.json",
+        "packages/hatching/tsconfig.json",
+        "packages/objects/package.json",
+        "packages/objects/src/index.ts",
+        "packages/objects/test/objects.test.ts",
+        "packages/objects/tsconfig.build.json",
+        "packages/objects/tsconfig.json",
+        "packages/renderer-svg/package.json",
+        "packages/renderer-svg/src/index.ts",
+        "packages/renderer-svg/test/renderer-svg.test.ts",
+        "packages/renderer-svg/tsconfig.build.json",
+        "packages/renderer-svg/tsconfig.json",
+        "packages/styles/package.json",
+        "packages/styles/src/index.ts",
+        "packages/styles/test/styles.test.ts",
+        "packages/styles/tsconfig.build.json",
+        "packages/styles/tsconfig.json",
+        "packages/ui/package.json",
+        "packages/ui/src/index.ts",
+        "packages/ui/test/ui.test.ts",
+        "packages/ui/tsconfig.build.json",
+        "packages/ui/tsconfig.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tsconfig.base.json",
+        "tsconfig.json"
+      ],
+      "tags": [
+        "round:0",
+        "looper:finding:round0-workspace-scaffold",
+        "looper:finding:workspace-generated-output-ignore-rules"
+      ],
+      "updated_at": "2026-11-07T01:28:20Z",
+      "unblock_when": "\"\""
+    },
+    {
+      "id": "T003",
+      "title": "Add one executable verify gate",
+      "priority": 1,
+      "status": "done",
+      "details": "Round 0 setup. Add pnpm verify. It runs typecheck, unit tests, and the determinism gate in one command. Later rounds extend this gate; they never weaken it. Acceptance: pnpm verify exits 0 on the main branch; it exits non-zero when any single gate fails; the README documents the command.\n\nReview repair: Implement the pnpm verify gate\nREADME.md now documents pnpm verify, but the command does not exist yet: no package.json, no scripts/verify.mjs. T003 implements the gate (typecheck, unit tests, determinism gate in one command), makes it exit non-zero when any single gate fails, and keeps the README documentation accurate. After T003, the combined verification will run pnpm verify instead of skipping the package.json branch.\nEvidence: Combined verify command: 'if grep -q '\"verify\"' package.json; then pnpm verify; elif [ -f package.json ]; then ...; fi' took no branch because package.json is absent; README.md:30 carries the documented command.\n\nReview repair: Implement the pnpm verify gate\nT002 landed the workspace without a verify script on purpose, so the combined gate's package.json probe keeps taking its fallback branch. T003 adds scripts/verify.mjs and the root verify script that runs typecheck, unit tests, and the determinism gate in one command, exits non-zero when any single gate fails, and makes the README claim live. The scaffold supports it: pnpm build, pnpm test, pnpm typecheck, and bare tsc all exit 0 from a fresh clone. Cross-package type imports resolve through dist/, so the gate must run pnpm build before pnpm typecheck once later tasks add cross-package imports (README states this).\nEvidence: grep -q '\"verify\"' package.json finds no match in commit 438fb2f; README.md line 54 documents the command as arriving with T003.",
+      "depends_on": [
+        "T002"
+      ],
+      "files": [
+        "README.md",
+        "package.json",
+        "scripts/verify.mjs"
+      ],
+      "tags": [
+        "round:0",
+        "looper:finding:round0-verify-gate"
+      ],
+      "updated_at": "2026-11-07T01:36:34Z",
+      "unblock_when": "\"\""
+    },
+    {
+      "id": "T010",
+      "title": "Define the core scene and style schemas",
+      "priority": 2,
+      "status": "done",
+      "details": "Round 1, V1. In @hatch/core, define SceneSpec, SceneObject, StyleSpec, Region, FillStyle, RenderIR, and RenderTrace as Zod schemas plus TypeScript types (specification sections 5, 7, 8, 22). Acceptance: a valid scene spec parses; a malformed spec fails with a readable error; the meta fields id, seed, stylePreset, and version are required; the types and schemas are exported from the package root.",
+      "depends_on": [
+        "T002"
+      ],
+      "files": [
+        "packages/core/package.json",
+        "packages/core/src/",
+        "packages/core/src/error.ts",
+        "packages/core/src/fill.ts",
+        "packages/core/src/geometry.ts",
+        "packages/core/src/index.ts",
+        "packages/core/src/ir.ts",
+        "packages/core/src/json.ts",
+        "packages/core/src/path.ts",
+        "packages/core/src/region.ts",
+        "packages/core/src/scene.ts",
+        "packages/core/src/style.ts",
+        "packages/core/src/trace.ts",
+        "packages/core/test/core.test.ts",
+        "packages/core/test/fixtures.ts",
+        "packages/core/test/ir.test.ts",
+        "packages/core/test/region.test.ts",
+        "packages/core/test/scene.test.ts",
+        "packages/core/test/style.test.ts",
+        "packages/core/test/trace.test.ts",
+        "pnpm-lock.yaml"
+      ],
+      "tags": [
+        "round:1-v1"
+      ],
+      "updated_at": "2026-11-07T01:47:44Z",
+      "unblock_when": "\"\""
+    },
+    {
+      "id": "T011",
+      "title": "Add deterministic seeded randomness",
+      "priority": 2,
+      "status": "done",
+      "details": "Round 1, V1. Provide one seeded RNG based on seedrandom and pass it through every render stage. Do not call Math.random in the render path (specification section 10). Acceptance: a unit test proves that the identical version, seed, preset, and spec give an identical random sequence; a test or lint guard blocks Math.random inside packages.\n\nReview repair: Math.random guard scans only .ts files, so .tsx sources escape the determinism guard\nT011 acceptance requires a test or lint guard that blocks Math.random inside packages. The guard in packages/core/test/no-math-random.test.ts collects only files whose name ends in '.ts'. When the T026 React editor adds .tsx sources (or any package adds .mts/.cts files), those files are not scanned and a Math.random call in them passes the gate, breaking the section 10 determinism contract silently. Fix the collector to match every TypeScript source extension (.ts, .tsx, .mts, .cts) and keep the non-empty scan assertion.\nEvidence: Sandbox test on a copy at /tmp/hatch-gate (worktree untouched): with packages/ui/src/demo.tsx containing 'return Math.random();', 'pnpm --filter @hatch/core test' passed 68/68 (exit 0); the same code in packages/ui/src/demo.ts failed with \"banned calls at: ui/src/demo.ts:1\". Collector: packages/core/test/no-math-random.test.ts, collectTypeScriptFiles, entry.name.endsWith('.ts').",
+      "depends_on": [
+        "T010"
+      ],
+      "files": [
+        "packages/core/package.json",
+        "packages/core/src/index.ts",
+        "packages/core/src/rng.ts",
+        "packages/core/test/no-math-random.test.ts",
+        "packages/core/test/rng.test.ts",
+        "pnpm-lock.yaml"
+      ],
+      "tags": [
+        "round:1-v1",
+        "looper:finding:math-random-guard-source-extensions"
+      ],
+      "updated_at": "2026-11-07T02:07:15Z"
+    },
+    {
+      "id": "T012",
+      "title": "Build the geometry helpers",
+      "priority": 2,
+      "status": "done",
+      "details": "Round 1, V1. In @hatch/geometry, implement splines, offsets, boolean clipping, path simplification, and region composition on top of Paper.js (specification section 11). Acceptance: unit tests cover clipping of overlapping regions, simplification within tolerance, and spline interpolation.",
+      "depends_on": [
+        "T010"
+      ],
+      "files": [
+        "README.md",
+        "packages/geometry/package.json",
+        "packages/geometry/src/",
+        "packages/geometry/src/clip.ts",
+        "packages/geometry/src/compose.ts",
+        "packages/geometry/src/index.ts",
+        "packages/geometry/src/measure.ts",
+        "packages/geometry/src/offset.ts",
+        "packages/geometry/src/paper.ts",
+        "packages/geometry/src/simplify.ts",
+        "packages/geometry/src/spline.ts",
+        "packages/geometry/test/clip.test.ts",
+        "packages/geometry/test/compose.test.ts",
+        "packages/geometry/test/fixtures.ts",
+        "packages/geometry/test/geometry.test.ts",
+        "packages/geometry/test/measure.test.ts",
+        "packages/geometry/test/offset.test.ts",
+        "packages/geometry/test/paper.test.ts",
+        "packages/geometry/test/simplify.test.ts",
+        "packages/geometry/test/spline.test.ts",
+        "pnpm-lock.yaml"
+      ],
+      "tags": [
+        "round:1-v1"
+      ],
+      "updated_at": "2026-11-07T02:46:37Z",
+      "unblock_when": "\"\""
+    },
+    {
+      "id": "T013",
+      "title": "Build the region hatching engine",
+      "priority": 2,
+      "status": "done",
+      "details": "Round 1, V1. In @hatch/hatching, generate hatch and crosshatch stroke sets clipped to region paths. Drive line jitter, angle drift, spacing variance, dropout, and pressure variance from the StyleSpec texture values through the seeded RNG (specification sections 7 and 17). Acceptance: all stroke geometry stays inside its region; density rises when spacing falls; identical seeds produce identical stroke sets.",
+      "depends_on": [
+        "T011",
+        "T012"
+      ],
+      "files": [
+        "packages/hatching/README.md",
+        "packages/hatching/src/",
+        "packages/hatching/src/engine.ts",
+        "packages/hatching/src/index.ts",
+        "packages/hatching/src/jitter.ts",
+        "packages/hatching/src/lines.ts",
+        "packages/hatching/src/stroke.ts",
+        "packages/hatching/test/engine.test.ts",
+        "packages/hatching/test/fixtures.ts",
+        "packages/hatching/test/jitter.test.ts"
+      ],
+      "tags": [
+        "round:1-v1"
+      ],
+      "updated_at": "2026-11-07T03:20:35Z"
+    },
+    {
+      "id": "T014",
+      "title": "Build the SVG region renderer",
+      "priority": 2,
+      "status": "done",
+      "details": "Round 1, V1. In @hatch/renderer-svg, render the paper background, region stacking by zIndex, clipping masks, cloud cutout masks as negative space, contour strokes, and an embedded metadata block with version, seed, and preset (specification sections 7, 11, 12). Acceptance: the output is well-formed SVG; the draw order follows zIndex; a mask produces a visible cutout; the metadata block is present.",
+      "depends_on": [
+        "T012",
+        "T013"
+      ],
+      "files": [
+        "packages/renderer-svg/README.md",
+        "packages/renderer-svg/src/",
+        "packages/renderer-svg/src/format.ts",
+        "packages/renderer-svg/src/ids.ts",
+        "packages/renderer-svg/src/index.ts",
+        "packages/renderer-svg/src/masks.ts",
+        "packages/renderer-svg/src/metadata.ts",
+        "packages/renderer-svg/src/path-data.ts",
+        "packages/renderer-svg/src/render.ts",
+        "packages/renderer-svg/src/xml.ts",
+        "packages/renderer-svg/test/fixtures.ts",
+        "packages/renderer-svg/test/masks.test.ts",
+        "packages/renderer-svg/test/metadata.test.ts",
+        "packages/renderer-svg/test/path-data.test.ts",
+        "packages/renderer-svg/test/render.test.ts",
+        "packages/renderer-svg/test/xml-check.ts",
+        "packages/renderer-svg/test/xml.test.ts"
+      ],
+      "tags": [
+        "round:1-v1"
+      ],
+      "updated_at": "2026-11-07T03:41:49Z"
+    },
+    {
+      "id": "T015",
+      "title": "Add generators for the five V1 objects",
+      "priority": 2,
+      "status": "done",
+      "details": "Round 1, V1. In @hatch/objects, build the house, tree, hill, mountain, and water generators. Each generator maps semantic parameters to Geometry with a silhouette, contour lines, internal boundaries, and style zones (specification sections 6 and 24). Acceptance: each generator returns non-empty geometry across a seeded parameter sweep; unit tests check the structure and the bounds.",
+      "depends_on": [
+        "T012"
+      ],
+      "files": [
+        "packages/objects/README.md",
+        "packages/objects/package.json",
+        "packages/objects/src/",
+        "packages/objects/src/generator.ts",
+        "packages/objects/src/hill.ts",
+        "packages/objects/src/house.ts",
+        "packages/objects/src/index.ts",
+        "packages/objects/src/mountain.ts",
+        "packages/objects/src/parameters.ts",
+        "packages/objects/src/placement.ts",
+        "packages/objects/src/roles.ts",
+        "packages/objects/src/scene-object.ts",
+        "packages/objects/src/shapes.ts",
+        "packages/objects/src/tree.ts",
+        "packages/objects/src/water.ts",
+        "packages/objects/test/generator.test.ts",
+        "packages/objects/test/hill.test.ts",
+        "packages/objects/test/house.test.ts",
+        "packages/objects/test/mountain.test.ts",
+        "packages/objects/test/objects.test.ts",
+        "packages/objects/test/parameters.test.ts",
+        "packages/objects/test/placement.test.ts",
+        "packages/objects/test/sweep.ts",
+        "packages/objects/test/tree.test.ts",
+        "packages/objects/test/water.test.ts",
+        "pnpm-lock.yaml"
+      ],
+      "tags": [
+        "round:1-v1"
+      ],
+      "updated_at": "2026-11-07T04:24:19Z"
+    },
+    {
+      "id": "T016",
+      "title": "Add the first style preset",
+      "priority": 2,
+      "status": "done",
+      "details": "Round 1, V1. In @hatch/styles, define pastoral-v1 with palette, hatch families for sky, field, foliage, mountain, water, and cliff, contour rules, object grammar, composition grammar, and texture (specification section 8). Acceptance: the preset validates against the StyleSpec schema; the package README documents each field.",
+      "depends_on": [
+        "T010"
+      ],
+      "files": [
+        "packages/styles/README.md",
+        "packages/styles/src/",
+        "packages/styles/src/freeze.ts",
+        "packages/styles/src/index.ts",
+        "packages/styles/src/pastoral-v1.ts",
+        "packages/styles/test/pastoral-v1.test.ts",
+        "packages/styles/test/presets.test.ts",
+        "packages/styles/test/styles.test.ts"
+      ],
+      "tags": [
+        "round:1-v1"
+      ],
+      "updated_at": "2026-11-07T02:13:04Z"
+    },
+    {
+      "id": "T017",
+      "title": "Build the scene compiler pipeline and engine API",
+      "priority": 2,
+      "status": "done",
+      "details": "Round 1, V1. Orchestrate the specification section 4 stages: scene planning with regions, depth order, and horizon; geometry synthesis; style application; and render. Expose the specification section 21 HatchEngine facade with renderScene, and return svg, sceneSpec, IR, and trace. The V1 trace records the spec hash, preset, seed, compiler version, and one event per stage (specification section 9). Acceptance: renderScene on an example spec returns valid SVG plus a JSON trace; an end-to-end test passes; a re-render with the same inputs is byte-identical.\n\nReview repair: Wire the seeded RNG streams through the engine pipeline stages\nT011 ships the mechanism: createSceneRng, createStageRng for every TRACE_STAGE, and fork. The pipeline stages do not exist yet; T017 must construct the stage streams from the render identity and hand them to planning, geometry synthesis, style application, and render, then prove byte-identical re-renders.\nEvidence: packages/core/src/rng.ts exports createStageRng(parts, stage) for all five TRACE_STAGES; packages/core/test/rng.test.ts proves stage streams are deterministic and independent of draws in other stages. TRACE_STAGES is defined in packages/core/src/trace.ts; no engine or stage code exists yet (packages other than core hold only skeletons).",
+      "depends_on": [
+        "T013",
+        "T014",
+        "T015",
+        "T016"
+      ],
+      "files": [
+        "README.md",
+        "packages/core/src/contour.ts",
+        "packages/core/src/engine.ts",
+        "packages/core/src/hash.ts",
+        "packages/core/src/index.ts",
+        "packages/core/src/plan.ts",
+        "packages/core/test/contour.test.ts",
+        "packages/core/test/engine.test.ts",
+        "packages/core/test/hash.test.ts",
+        "packages/core/test/plan.test.ts",
+        "packages/renderer-svg/README.md",
+        "packages/renderer-svg/package.json",
+        "packages/renderer-svg/src/",
+        "packages/renderer-svg/src/index.ts",
+        "packages/renderer-svg/src/pipeline.ts",
+        "packages/renderer-svg/src/render.ts",
+        "packages/renderer-svg/test/pipeline.test.ts",
+        "pnpm-lock.yaml"
+      ],
+      "tags": [
+        "round:1-v1",
+        "looper:finding:rng-pipeline-wiring"
+      ],
+      "updated_at": "2026-11-07T05:13:26Z",
+      "unblock_when": "\"\""
+    },
+    {
+      "id": "T018",
+      "title": "Add PNG export",
+      "priority": 2,
+      "status": "done",
+      "details": "Round 1, V1. In @hatch/export, convert SVG to PNG with resvg-js or sharp (specification sections 2, 11, 24). Acceptance: a test renders an example PNG; the pixel size matches the requested aspect ratio; fixed inputs give identical PNG bytes.",
+      "depends_on": [
+        "T017"
+      ],
+      "files": [
+        ".gitignore",
+        "README.md",
+        "packages/export/package.json",
+        "packages/export/src/",
+        "packages/export/src/index.ts",
+        "packages/export/src/png-info.ts",
+        "packages/export/src/png.ts",
+        "packages/export/test/fixtures.ts",
+        "packages/export/test/png.test.ts",
+        "pnpm-lock.yaml"
+      ],
+      "tags": [
+        "round:1-v1"
+      ],
+      "updated_at": "2026-11-07T05:33:30Z",
+      "unblock_when": "\"\""
+    },
+    {
+      "id": "T019",
+      "title": "Prove the V1 release gate",
+      "priority": 2,
+      "status": "done",
+      "details": "Round 1, V1. Add seeded example scenes that use all five objects, cloud cutouts, the paper background, and the pastoral-v1 preset. Commit golden SVG fixtures. Run the specification section 24 V1 checklist as the gate: SVG output, paper background, region hatching, cloud cutouts, five object types, one style preset, deterministic seed, JSON scene spec, and SVG plus PNG export. Acceptance: two runs of each example are byte-identical; the golden fixtures match; pnpm verify exits 0.\n\nReview repair: Wire svgToPng into the V1 examples and the release gate\nT019 renders seeded example scenes and runs the specification section 24 checklist, which lists 'SVG plus PNG export'. The PNG side can now call svgToPng(svg, { fit: { mode: \"width\", value: N } }) from @hatch/export; the pixel size follows the scene aspect ratio, and .gitignore already excludes examples/output/ for the raster output the examples write. Golden SVG fixtures stay tracked; PNG bytes should be compared between runs of the same tree rather than committed, because the pinned resvg version is one of the fixed inputs.\nEvidence: packages/export/src/png.ts exports svgToPng; packages/export/test/png.test.ts proves the engine-to-PNG path end to end (480x360 for 4:3, 480x270 for 16:9, byte identity across calls); .gitignore adds examples/output/ with a comment naming T019; pnpm verify exits 0 with 519 tests.",
+      "depends_on": [
+        "T003",
+        "T017",
+        "T018"
+      ],
+      "files": [
+        "README.md",
+        "examples/",
+        "examples/README.md",
+        "examples/golden/mountain-lake-0002.svg",
+        "examples/golden/pastoral-creek-0001.svg",
+        "examples/render.mjs",
+        "examples/scenes/mountain-lake-0002.json",
+        "examples/scenes/pastoral-creek-0001.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tests/",
+        "tests/README.md",
+        "tests/package.json",
+        "tests/tsconfig.json",
+        "tests/v1-release-gate.test.ts",
+        "tsconfig.json"
+      ],
+      "tags": [
+        "round:1-v1",
+        "looper:finding:v1-release-gate"
+      ],
+      "updated_at": "2026-11-07T06:24:40Z"
+    },
+    {
+      "id": "T020",
+      "title": "Expand the object library for skatepark and urban scenes",
+      "priority": 3,
+      "status": "done",
+      "details": "Round 2, V2. Add skatepark objects: bowl, quarter pipe, handrail, skater, fence, and bench. Add urban objects: tram, building block, streetlight, car, road, and lamp post (specification sections 5, 11, 24). Acceptance: each new kind meets the generator contract from T015; at least one skatepark scene and one urban scene render without errors.",
+      "depends_on": [
+        "T015"
+      ],
+      "files": [
+        "packages/core/test/engine.test.ts",
+        "packages/objects/README.md",
+        "packages/objects/src/",
+        "packages/objects/src/bench.ts",
+        "packages/objects/src/bowl.ts",
+        "packages/objects/src/building-block.ts",
+        "packages/objects/src/car.ts",
+        "packages/objects/src/fence.ts",
+        "packages/objects/src/generator.ts",
+        "packages/objects/src/handrail.ts",
+        "packages/objects/src/index.ts",
+        "packages/objects/src/lamp-post.ts",
+        "packages/objects/src/quarter-pipe.ts",
+        "packages/objects/src/road.ts",
+        "packages/objects/src/roles.ts",
+        "packages/objects/src/scene-object.ts",
+        "packages/objects/src/shapes.ts",
+        "packages/objects/src/skater.ts",
+        "packages/objects/src/streetlight.ts",
+        "packages/objects/src/tram.ts",
+        "packages/objects/test/bench.test.ts",
+        "packages/objects/test/bowl.test.ts",
+        "packages/objects/test/building-block.test.ts",
+        "packages/objects/test/car.test.ts",
+        "packages/objects/test/fence.test.ts",
+        "packages/objects/test/generator.test.ts",
+        "packages/objects/test/handrail.test.ts",
+        "packages/objects/test/lamp-post.test.ts",
+        "packages/objects/test/objects.test.ts",
+        "packages/objects/test/parameters.test.ts",
+        "packages/objects/test/quarter-pipe.test.ts",
+        "packages/objects/test/road.test.ts",
+        "packages/objects/test/skater.test.ts",
+        "packages/objects/test/streetlight.test.ts",
+        "packages/objects/test/sweep.ts",
+        "packages/objects/test/tram.test.ts",
+        "packages/renderer-svg/src/pipeline.ts",
+        "packages/renderer-svg/test/pipeline.test.ts",
+        "packages/renderer-svg/test/scenes-round2.test.ts"
+      ],
+      "tags": [
+        "round:2-v2"
+      ],
+      "updated_at": "2026-11-07T06:42:53Z"
+    },
+    {
+      "id": "T021",
+      "title": "Add the coastal, urban, and skatepark presets",
+      "priority": 3,
+      "status": "done",
+      "details": "Round 2, V2. In @hatch/styles, add coastal-v1, urban-v1, and skatepark-v1 (specification sections 11 and 24). Acceptance: each preset validates against the StyleSpec schema; one example scene renders in each preset; the presets are documented.\n\nReview repair: Style the round 2 scenes with the skatepark-v1 and urban-v1 presets\nThe acceptance scenes of this task render under pastoral-v1, the one preset the first release ships. Task T021 delivers the round 2 style presets; once they exist, re-point skateparkSceneSpec and urbanStreetSceneSpec in packages/renderer-svg/test/scenes-round2.test.ts at them and tighten the family expectations to the tuned tables.\nEvidence: packages/renderer-svg/test/scenes-round2.test.ts renders both scenes with stylePreset \"pastoral-v1\"; packages/renderer-svg/test/pipeline.test.ts asserts hasPreset(\"skatepark-v1\") is false today.",
+      "depends_on": [
+        "T016",
+        "T020"
+      ],
+      "files": [
+        "packages/renderer-svg/test/pipeline.test.ts",
+        "packages/renderer-svg/test/presets-round2.test.ts",
+        "packages/renderer-svg/test/scenes-round2.test.ts",
+        "packages/styles/README.md",
+        "packages/styles/src/",
+        "packages/styles/src/coastal-v1.ts",
+        "packages/styles/src/index.ts",
+        "packages/styles/src/skatepark-v1.ts",
+        "packages/styles/src/urban-v1.ts",
+        "packages/styles/test/coastal-v1.test.ts",
+        "packages/styles/test/presets.test.ts",
+        "packages/styles/test/skatepark-v1.test.ts",
+        "packages/styles/test/styles.test.ts",
+        "packages/styles/test/urban-v1.test.ts",
+        "tests/v1-release-gate.test.ts"
+      ],
+      "tags": [
+        "round:2-v2",
+        "looper:finding:looper:finding:round2-scene-presets"
+      ],
+      "updated_at": "2026-11-07T07:30:59Z",
+      "unblock_when": "\"\""
+    },
+    {
+      "id": "T022",
+      "title": "Add debug overlays",
+      "priority": 3,
+      "status": "done",
+      "details": "Round 2, V2. Render a region map, a depth layer overlay, a hatch direction map, object anchors, a negative-space map, and a contour-only preview. Drive them from the SceneSpec debug flags (specification sections 5 and 9). Acceptance: each flag adds one overlay layer to the SVG; with all flags off, the output is byte-identical to a render whose spec carries no debug object.",
+      "depends_on": [
+        "T017"
+      ],
+      "files": [
+        "packages/core/src/engine.ts",
+        "packages/core/src/hash.ts",
+        "packages/core/src/ir.ts",
+        "packages/core/src/region.ts",
+        "packages/core/src/scene.ts",
+        "packages/core/test/engine.test.ts",
+        "packages/core/test/fixtures.ts",
+        "packages/core/test/hash.test.ts",
+        "packages/core/test/ir.test.ts",
+        "packages/core/test/region.test.ts",
+        "packages/core/test/scene.test.ts",
+        "packages/renderer-svg/README.md",
+        "packages/renderer-svg/src/",
+        "packages/renderer-svg/src/debug.ts",
+        "packages/renderer-svg/src/index.ts",
+        "packages/renderer-svg/src/render.ts",
+        "packages/renderer-svg/test/debug.test.ts",
+        "packages/renderer-svg/test/fixtures.ts",
+        "packages/renderer-svg/test/pipeline.test.ts"
+      ],
+      "tags": [
+        "round:2-v2"
+      ],
+      "updated_at": "2026-11-07T06:50:06Z"
+    },
+    {
+      "id": "T023",
+      "title": "Add scene edit operations",
+      "priority": 3,
+      "status": "done",
+      "details": "Round 2, V2. Implement the specification section 21 edit API on HatchEngine, backed by @hatch/agent: moveObject, setStyle, replaceObject, addObject, and removeObject. Edits patch the spec, never the pixels (specification section 15). Acceptance: each operation returns an updated spec that re-renders; a property-based test applies each operation and renders the result.",
+      "depends_on": [
+        "T017"
+      ],
+      "files": [
+        "README.md",
+        "packages/agent/package.json",
+        "packages/agent/src/",
+        "packages/agent/src/edits.ts",
+        "packages/agent/src/index.ts",
+        "packages/agent/test/edits.test.ts",
+        "packages/core/src/engine.ts",
+        "packages/core/test/engine.test.ts",
+        "packages/renderer-svg/README.md",
+        "packages/renderer-svg/package.json",
+        "packages/renderer-svg/src/pipeline.ts",
+        "packages/renderer-svg/test/edit-operations.test.ts",
+        "pnpm-lock.yaml"
+      ],
+      "tags": [
+        "round:2-v2"
+      ],
+      "updated_at": "2026-11-07T08:07:54Z",
+      "unblock_when": "\"\""
+    },
+    {
+      "id": "T024",
+      "title": "Add visual regression tests",
+      "priority": 3,
+      "status": "done",
+      "details": "Round 2, V2. Add Playwright golden-image tests over the PNG output (specification sections 20 and 24). This is browser-platform validation; round 1 stays free of it by design. The task includes its own prerequisite: download the Playwright browser binaries; network access is present. Acceptance: baseline images are committed; a pixel drift fails the suite; pnpm verify includes the suite and runs it headless.\n\nReview repair: The visual gate cannot see a one-pixel drift that lands on an antialiasing-looking pixel\nThe visual gate claims zero drift tolerance (maxDiffPixels: 0, threshold: 0), but Playwright's toHaveScreenshot comparator is pixelmatch with its antialiasing detection on, which Playwright does not expose a switch for. A single-pixel render drift that lands on a position whose 3x3 neighbourhood looks like an antialiased edge is dropped from the diff count and passes the gate. The strictness test now proves the strictness on a pixel inside a uniform patch, which keeps the proof valid, but the blind spot itself remains. A true zero-tolerance check would need a byte or pixel comparison outside toHaveScreenshot (for example comparing the exported PNG bytes directly, as the SVG gate already does against examples/golden/).\nEvidence: Reproduced on 2026-11-07 while regenerating baselines for T032: the strictness test 'one drifted pixel fails the golden comparison' failed against the new baseline and passed against the old one, because the render change moved a hatch stroke over the corner pixel (0,0) of mountain-lake-0002.png. A local transcription of playwright-core 1.65.0's bundled pixelmatch shows the corner flip counts 0 diff pixels (classified \"aa\") while a flip inside a uniform patch counts 1. Papercut pc_01M6TPAQ75REDRGK8TSX00EP4N records the same finding.",
+      "depends_on": [
+        "T003",
+        "T017",
+        "T018"
+      ],
+      "files": [
+        ".gitignore",
+        "README.md",
+        "pnpm-lock.yaml",
+        "scripts/verify.mjs",
+        "tests/README.md",
+        "tests/package.json",
+        "tests/visual/",
+        "tests/visual/README.md",
+        "tests/visual/baselines/mountain-lake-0002-debug-overlays.png",
+        "tests/visual/baselines/mountain-lake-0002-urban-v1.png",
+        "tests/visual/baselines/mountain-lake-0002.png",
+        "tests/visual/baselines/pastoral-creek-0001.png",
+        "tests/visual/playwright.config.ts",
+        "tests/visual/scenes.ts",
+        "tests/visual/update-baselines.mjs",
+        "tests/visual/visual-regression.spec.ts",
+        "tests/vitest.config.ts"
+      ],
+      "tags": [
+        "round:2-v2",
+        "looper:finding:visual-drift-pixelmatch-aa-blindspot"
+      ],
+      "updated_at": "2026-11-07T10:43:06Z"
+    },
+    {
+      "id": "T025",
+      "title": "Add the prompt-to-spec planner",
+      "priority": 4,
+      "status": "blocked",
+      "details": "Round 3, V3. In @hatch/agent, parse a prompt into semantic intent and plan a scene graph under the style-aware constraints (specification sections 4, 13, 18). The specification names no model provider; a deterministic template planner is acceptable. Acceptance: example prompts produce valid SceneSpec objects that pass validation and render; the planner repairs over-dense or under-empty compositions before render.\n\nReview repair: V3 prompt-to-spec planner and the high-level section 21 render entry are not implemented\nRound 3 of specification section 24. Parse a prompt into semantic intent and plan a valid SceneSpec under the style-aware constraints (sections 4, 13, 18), including the high-level engine.render({prompt, stylePreset, seed, aspectRatio}) entry of section 21 and Mode 1 of section 14. Acceptance per T025: example prompts produce valid SceneSpec objects that pass validation and render; the planner repairs over-dense or under-empty compositions before render.\nEvidence: packages/agent/src holds edits.ts and index.ts only; index.ts states the planner 'arrives with the rounds that own them'. packages/renderer-svg/src/pipeline.ts:28 states 'the high-level prompt entry of specification section 21 arrives with the round that owns it'. Status todo in the accepted backlog at this revision is accurate.\n\nReview repair: The V3 prompt-to-spec planner and the high-level section 21 render entry are not implemented\nRound 3 acceptance per T025: example prompts parse into valid SceneSpec objects that pass validation and render, including the engine.render({ prompt, stylePreset, seed, aspectRatio }) entry of section 21 and Mode 1 of section 14, and the planner repairs over-dense or under-empty compositions before render.\nEvidence: Re-verified at 63dc621: packages/agent/src holds diff.ts, edits.ts, and index.ts only; index.ts still states the planner arrives with the round that owns it, and packages/renderer-svg/src/pipeline.ts:23-24 carries the same note for the high-level prompt entry. The task is todo in the accepted backlog; the capability is absent from the integrated product.",
+      "depends_on": [
+        "T021",
+        "T028"
+      ],
+      "files": [
+        "packages/agent/src/"
+      ],
+      "blockers": [
+        "Deferred: Round 3 starts the prompt-to-spec planner of specification sections 4, 13, and 18"
+      ],
+      "tags": [
+        "looper:deferred",
+        "looper:finding:v3-prompt-to-spec-planner",
+        "round:3-v3"
+      ],
+      "unblock_when": "Round 3 starts the prompt-to-spec planner of specification sections 4, 13, and 18; remove looper:deferred and set todo when this condition is met."
+    },
+    {
+      "id": "T026",
+      "title": "Add the interactive editor",
+      "priority": 4,
+      "status": "done",
+      "details": "Round 3, V3. In @hatch/ui, build the React and Vite editor: canvas preview, layer and object list, inspector, seed field, preset picker, hatch and composition controls, debug toggles, and export panel (specification sections 11 and 23). Acceptance: the editor loads a spec, edits it through the edit operations, re-renders, and exports SVG and PNG; a Playwright smoke test passes.",
+      "depends_on": [
+        "T022",
+        "T023"
+      ],
+      "files": [
+        "README.md",
+        "package.json",
+        "packages/ui/",
+        "packages/ui/README.md",
+        "packages/ui/e2e/editor.spec.ts",
+        "packages/ui/index.html",
+        "packages/ui/package.json",
+        "packages/ui/playwright.config.ts",
+        "packages/ui/src/App.tsx",
+        "packages/ui/src/components/Canvas.tsx",
+        "packages/ui/src/components/CompositionControls.tsx",
+        "packages/ui/src/components/DebugToggles.tsx",
+        "packages/ui/src/components/ExportPanel.tsx",
+        "packages/ui/src/components/HatchControls.tsx",
+        "packages/ui/src/components/Inspector.tsx",
+        "packages/ui/src/components/MetaBar.tsx",
+        "packages/ui/src/components/NumberField.tsx",
+        "packages/ui/src/components/ObjectList.tsx",
+        "packages/ui/src/components/SpecPanel.tsx",
+        "packages/ui/src/editor/download.ts",
+        "packages/ui/src/editor/engine.ts",
+        "packages/ui/src/editor/png.ts",
+        "packages/ui/src/editor/starters.ts",
+        "packages/ui/src/editor/state.ts",
+        "packages/ui/src/index.ts",
+        "packages/ui/src/main.tsx",
+        "packages/ui/src/styles.css",
+        "packages/ui/src/vite-env.d.ts",
+        "packages/ui/test/png.test.ts",
+        "packages/ui/test/state.test.ts",
+        "packages/ui/test/ui.test.ts",
+        "packages/ui/tsconfig.build.json",
+        "packages/ui/tsconfig.json",
+        "packages/ui/vite.config.ts",
+        "packages/ui/vitest.config.ts",
+        "pnpm-lock.yaml",
+        "scripts/verify.mjs",
+        "tsconfig.json"
+      ],
+      "tags": [
+        "round:3-v3"
+      ],
+      "updated_at": "2026-11-07T12:34:11Z",
+      "unblock_when": "\"\""
+    },
+    {
+      "id": "T027",
+      "title": "Add scene diffing and richer instrumentation",
+      "priority": 4,
+      "status": "done",
+      "details": "Round 3, V3. Diff two scene specs at the semantic level. Emit output metrics per render: region count, stroke count, SVG size, export timing, and visual density score (specification sections 9 and 21). Acceptance: a diff between two specs lists the semantic changes; every render trace carries the full metric set.\n\nReview repair: V3 scene diffing and the full output metric set are not implemented\nRound 3 of specification section 24, tracked by T027. Diff two scene specs at the semantic level and emit the full section 9E metric set on every render: region count, stroke count, SVG size, export timing, and visual density score. Acceptance per T027: a diff between two specs lists the semantic changes; every render trace carries the full metric set.\nEvidence: No diff module exists in packages/agent/src. The trace of examples/output/pastoral-creek-0001.trace.json carries metrics {regionCount:11, strokeCount:709, svgSizeBytes:71598} only; exportDurationMs and visualDensityScore are optional in packages/core/src/trace.ts:39-45 and never populated by packages/core/src/engine.ts:1106-1113. Status todo in the accepted backlog is accurate.",
+      "depends_on": [
+        "T017"
+      ],
+      "files": [
+        "README.md",
+        "examples/README.md",
+        "examples/render.mjs",
+        "packages/agent/src/",
+        "packages/agent/src/diff.ts",
+        "packages/agent/src/index.ts",
+        "packages/agent/test/diff.test.ts",
+        "packages/agent/test/edits.test.ts",
+        "packages/core/src/",
+        "packages/core/src/engine.ts",
+        "packages/core/src/trace.ts",
+        "packages/core/test/engine.test.ts",
+        "packages/core/test/fixtures.ts",
+        "packages/core/test/trace.test.ts",
+        "packages/hatching/src/engine.ts",
+        "packages/hatching/src/stroke.ts",
+        "packages/hatching/test/engine.test.ts",
+        "packages/renderer-svg/README.md",
+        "packages/renderer-svg/src/render.ts",
+        "packages/renderer-svg/test/pipeline.test.ts",
+        "packages/renderer-svg/test/strokes.test.ts",
+        "packages/ui/src/components/Canvas.tsx",
+        "tests/README.md",
+        "tests/v1-release-gate.test.ts"
+      ],
+      "tags": [
+        "round:3-v3",
+        "looper:finding:v3-scene-diffing-metrics"
+      ],
+      "updated_at": "2026-11-07T18:41:19Z",
+      "unblock_when": "\"\""
+    },
+    {
+      "id": "T028",
+      "title": "Add semantic validation and the constraint solver",
+      "priority": 4,
+      "status": "blocked",
+      "details": "Round 3, V3. Before render, run semantic validators: objects outside the canvas, hatch density too high, too many focal objects, negative space below the minimum, and an invalid region stack. Add a solver that collapses over-dense scenes (specification sections 18 and 19). Acceptance: invalid specs fail with actionable messages; the solver emits a valid variant; each rule has a unit test.",
+      "depends_on": [
+        "T017"
+      ],
+      "files": [
+        "packages/core/src/"
+      ],
+      "blockers": [
+        "Deferred: T028 leaves the blocked state",
+        "Repair 2 of at most 6.\nLatest worker report: Landed T028 and repaired the failed combined verification. The retained implementation stands: packages/core/src/validate.ts runs the five semantic validators of specification section 19 (objects-o...\nEarlier attempt records: /home/agent/.looper/hatch-04810ba9/runtime/task-8ed892542359e339.\nInspect prior results before repeating an approach.\nIf this task cannot fix the recorded condition, report blocked with evidence.\n\nThe task conflicts with the integrated project.\ngit -c user.name=Looper -c user.email=looper@localhost -c core.hooksPath=/dev/null merge --no-commit --no-ff 1aa49d9e4a431672ea166c76daf0f5e5f76bafb6: : exit status 1\nAuto-merging packages/core/src/engine.ts\nAuto-merging packages/core/test/engine.test.ts\nCONFLICT (content): Merge conflict in packages/core/test/engine.test.ts\nAutomatic merge failed; fix conflicts and then commit the result.\nThe retained result conflicts with the integrated project.\ngit -c user.name=Looper -c user.email=looper@localhost -c core.hooksPath=/dev/null merge --no-commit --no-ff 1aa49d9e4a431672ea166c76daf0f5e5f76bafb6: : exit status 1\nAuto-merging packages/core/src/engine.ts\nAuto-merging packages/core/test/engine.test.ts\nCONFLICT (content): Merge conflict in packages/core/test/engine.test.ts\nAutomatic merge failed; fix conflicts and then commit the result."
+      ],
+      "tags": [
+        "looper:deferred",
+        "looper:finding:looper:finding:negative-space-unread",
+        "looper:finding:v3-semantic-validation-solver",
+        "round:3-v3"
+      ],
+      "updated_at": "2026-11-07T06:53:14Z",
+      "unblock_when": "T028 leaves the blocked state; remove looper:deferred and set todo when this condition is met."
+    },
+    {
+      "id": "T029",
+      "title": "Add the plugin object architecture",
+      "priority": 4,
+      "status": "blocked",
+      "details": "Round 3, V3. Let new object kinds and generators register at runtime without changes to the core packages (specification section 24). Acceptance: a test plugin object renders through the standard pipeline from a clean checkout.",
+      "depends_on": [
+        "T015",
+        "T017"
+      ],
+      "files": [
+        "packages/objects/src/"
+      ],
+      "blockers": [
+        "Repair 1 of at most 6.\nLatest worker report: Added the plugin object architecture of specification section 24, V3. packages/objects/src/registry.ts holds the runtime registry: registerObjectGenerator checks the whole ObjectGenerator contract ...\nEarlier attempt records: /home/agent/.looper/hatch-04810ba9/runtime/task-b1f61ae6ccaa3eab.\nInspect prior results before repeating an approach.\nIf this task cannot fix the recorded condition, report blocked with evidence.\n\nThe task conflicts with the integrated project.\ngit -c user.name=Looper -c user.email=looper@localhost -c core.hooksPath=/dev/null merge --no-commit --no-ff c680b49768e36d3446883378ec63007e3e0c98de: : exit status 1\nAuto-merging README.md\nCONFLICT (content): Merge conflict in README.md\nAuto-merging packages/renderer-svg/src/pipeline.ts\nAutomatic merge failed; fix conflicts and then commit the result.\nThe retained result conflicts with the integrated project.\ngit -c user.name=Looper -c user.email=looper@localhost -c core.hooksPath=/dev/null merge --no-commit --no-ff c680b49768e36d3446883378ec63007e3e0c98de: : exit status 1\nAuto-merging README.md\nCONFLICT (content): Merge conflict in README.md\nAuto-merging packages/renderer-svg/src/pipeline.ts\nAutomatic merge failed; fix conflicts and then commit the result."
+      ],
+      "tags": [
+        "round:3-v3",
+        "looper:finding:v3-plugin-object-registry"
+      ],
+      "updated_at": "2026-11-07T08:26:00Z",
+      "unblock_when": "Resolve the recorded condition and set this task to todo."
+    },
+    {
+      "id": "T030",
+      "title": "Add PDF export",
+      "priority": 4,
+      "status": "done",
+      "details": "Round 3, V3. In @hatch/export, convert SVG to vector PDF (specification sections 11 and 12). Acceptance: a test exports a PDF with vector strokes, not raster output; the file starts with a valid PDF header; the page size matches the aspect ratio.",
+      "depends_on": [
+        "T018"
+      ],
+      "files": [
+        "README.md",
+        "packages/export/src/",
+        "packages/export/src/index.ts",
+        "packages/export/src/pdf-file.ts",
+        "packages/export/src/pdf-graphics.ts",
+        "packages/export/src/pdf-info.ts",
+        "packages/export/src/pdf.ts",
+        "packages/export/src/xml.ts",
+        "packages/export/test/fixtures.ts",
+        "packages/export/test/pdf.test.ts"
+      ],
+      "tags": [
+        "round:3-v3"
+      ],
+      "updated_at": "2026-11-07T07:10:07Z",
+      "unblock_when": "\"\""
+    },
+    {
+      "id": "T031",
+      "title": "Optional roughjs and opentype.js integrations",
+      "priority": 5,
+      "status": "blocked",
+      "details": "Optional work outside every round. Specification sections 2 and 20 name roughjs as an optional humanization pass and opentype.js as optional label support. Neither is part of the V1, V2, or V3 acceptance lists. Do not start this work until the user asks for it.",
+      "blockers": [
+        "No user requirement exists; the specification marks both libraries as optional support code, not required work."
+      ],
+      "tags": [
+        "looper:deferred",
+        "round:optional"
+      ],
+      "unblock_when": "The user requests hand-drawn overlay effects through roughjs or text labels in scenes through opentype.js."
+    },
+    {
+      "id": "T032",
+      "title": "Escape RNG fork labels in @hatch/core so fork chains cannot collide",
+      "priority": 3,
+      "status": "done",
+      "details": "SeededRng.fork(label) builds its key by plain concatenation (`${seedKey}/fork:${label}`), so two different fork chains can resolve to one stream: the family fork of region \"hill\" and the region fork of region \"hill/fork:a\" share the seed key. @hatch/hatching now quotes its region ids inside the label (packages/hatching/src/engine.ts, hatchRegion), which closes the hole for this package. The same hole stays open for every other caller of fork (object generators, the planner, the engine stages of T017). Fix it once in core, for example by JSON.stringify-ing the label inside fork, and add a regression test that two fork chains with colliding text produce different streams.\nEvidence: packages/core/src/rng.ts line 97: `fork: (label) =\u003e createRng(`${seedKey}/fork:${label}`)`. Reproduced during the T013 review: seed keys of both chains compare equal before quoting; the regression test \"gives two regions with fork-shaped ids their own streams\" (packages/hatching/test/engine.test.ts) pins the quoted-label behaviour in this package.",
+      "files": [
+        "examples/golden/mountain-lake-0002.svg",
+        "examples/golden/pastoral-creek-0001.svg",
+        "packages/core/src/engine.ts",
+        "packages/core/src/plan.ts",
+        "packages/core/src/rng.ts",
+        "packages/core/test/rng.test.ts",
+        "packages/hatching/src/engine.ts",
+        "packages/hatching/test/engine.test.ts",
+        "packages/objects/src/scene-object.ts",
+        "tests/visual/README.md",
+        "tests/visual/baselines/mountain-lake-0002-debug-overlays.png",
+        "tests/visual/baselines/mountain-lake-0002-urban-v1.png",
+        "tests/visual/baselines/mountain-lake-0002.png",
+        "tests/visual/baselines/pastoral-creek-0001.png",
+        "tests/visual/visual-regression.spec.ts"
+      ],
+      "tags": [
+        "looper:finding:rng-fork-label-escaping"
+      ],
+      "updated_at": "2026-11-07T09:48:07Z",
+      "unblock_when": "\"\""
+    },
+    {
+      "id": "T033",
+      "title": "SVG renderer ignores the Mask.invert schema default and renders such masks inverted",
+      "priority": 3,
+      "status": "done",
+      "details": "A Mask that omits invert must render with the schema default: invert true paints the canvas white and the mask path black, so the path carves negative space out of the hatching. renderSvg must consume the validated parse result (or the schema must require an explicit invert), and a regression test must render a mask with no invert field and assert the cutout semantics.\nEvidence: packages/core/src/ir.ts:61 declares invert: z.boolean().default(true). packages/renderer-svg/src/render.ts:292 validates the IR with RenderIRSchema.safeParse, but lines 298-300 serialize the raw ir, and packages/renderer-svg/src/masks.ts:64-76 reads mask.invert directly. Executable check against the built dist at 0deaa9a: MaskSchema.safeParse({id:\"cloud-1\", path}) succeeds with parsed invert=true; RenderIRSchema.safeParse of an IR carrying that mask succeeds with masks[0].invert===true; renderSvg(ir) emits a mask whose first rect has fill=\"#000000\" (hide-all canvas, keep-only-inside), the inverse of the documented default. Every existing test sets invert explicitly (packages/renderer-svg/test/fixtures.ts:163, packages/renderer-svg/test/masks.test.ts:75), so the default path is untested.",
+      "files": [
+        "packages/renderer-svg/src/render.ts",
+        "packages/renderer-svg/test/fixtures.ts",
+        "packages/renderer-svg/test/render.test.ts"
+      ],
+      "tags": [
+        "looper:finding:svg-renderer-mask-invert-default"
+      ],
+      "updated_at": "2026-11-07T04:02:13Z"
+    },
+    {
+      "id": "T034",
+      "title": "Symbol placements render dangling references; no task owns the definition side",
+      "priority": 4,
+      "status": "done",
+      "details": "A SymbolPlacement carried in a RenderIR must resolve to a defined mark in the emitted SVG. Either one stage owns a symbol definition source emitted into defs, or the renderer validates placements against defined symbols and rejects or documents unresolved ones. Until then, scenes that carry symbols silently lose them.\nEvidence: packages/renderer-svg/src/render.ts:184-195 emits \u003cuse href=\"#{symbolId}\"\u003e for each placement, and render.ts:232-263 puts only masks and clip paths into defs. A grep over every packages/*/src finds no \u003csymbol\u003e emission or symbol-library producer anywhere. The T014 fixture places symbolId \"bird-v1\" (packages/renderer-svg/test/fixtures.ts:228) and the tests assert only layer ordering, so the emitted document carries a dangling reference that renders nothing. No backlog task owns symbol definitions: T015 and T020 generators produce Geometry, and T029 registers generators, not symbol marks.",
+      "files": [
+        "packages/core/src/ir.ts",
+        "packages/core/test/fixtures.ts",
+        "packages/core/test/ir.test.ts",
+        "packages/renderer-svg/README.md",
+        "packages/renderer-svg/src/index.ts",
+        "packages/renderer-svg/src/render.ts",
+        "packages/renderer-svg/src/symbols.ts",
+        "packages/renderer-svg/test/fixtures.ts",
+        "packages/renderer-svg/test/render.test.ts"
+      ],
+      "tags": [
+        "looper:finding:symbol-mark-definition-source"
+      ],
+      "updated_at": "2026-11-07T04:16:59Z"
+    },
+    {
+      "id": "T035",
+      "title": "Export a RenderIR input type so callers can omit schema-defaulted fields without a cast",
+      "priority": 4,
+      "status": "blocked",
+      "details": "RenderIR and Mask are zod output types, so `invert` is a required boolean at the type level even though MaskSchema accepts its absence at runtime. A caller that hands the renderer an IR parsed from JSON therefore needs a type cast, as cloudMaskInput in packages/renderer-svg/test/fixtures.ts does today. Export RenderIRInput = z.input\u003ctypeof RenderIRSchema\u003e (and MaskInput) from @hatch/core and let renderSvg accept the input type, keeping the validated output type for everything downstream of the parse. Low priority: no JSON-driven caller exists yet, and the runtime behavior is already correct.\nEvidence: packages/core/src/ir.ts:78-79 derives Mask and RenderIR from z.infer, the parse output, while packages/core/src/ir.ts:61 declares invert: z.boolean().default(true), the parse input. The T033 regression test had to cast the invert-free mask to Mask to pass it through sceneIR.",
+      "blockers": [
+        "Deferred: T035 starts exporting the input types"
+      ],
+      "tags": [
+        "looper:deferred",
+        "looper:finding:renderir-input-type"
+      ],
+      "unblock_when": "T035 starts exporting the input types; remove looper:deferred and set todo when this condition is met."
+    },
+    {
+      "id": "T036",
+      "title": "Shrink the SVG bytes one scene renders to",
+      "priority": 3,
+      "status": "done",
+      "details": "A full 1024x768 scene (six objects, three clouds) renders to about 754 KB of SVG for roughly 780 hatch strokes, because every wavy stroke is a polyline sampled at about 2.8 user units. Coarsen the sampling step, emit relative path commands, or drop collinear points after the wave sum so a V1 scene stays well under 100 KB. This keeps the PNG and PDF exporters of T018 and the visual regression fixtures of T024 small and fast.\nEvidence: Render of the T017 acceptance scene (pastoral-creek-0001, seed 20261107): metrics report 783 strokes and 754502 bytes; the sky region alone contributes 108 stroke paths of roughly 366 points each.\n\nReview repair: Shrink the SVG bytes one scene renders to\nA V1 scene with six objects still renders to about 787 KB to 808 KB of SVG (879 and 1076 strokes), so the two committed golden fixtures together add about 1.6 MB of text to the repository. Coarsening the stroke sampling or emitting relative path commands keeps a scene under the 100 KB target of T036 and shrinks the goldens the release gate must carry; regenerate them with 'node examples/render.mjs --golden' inside that task.\nEvidence: examples/output render report after T019: pastoral-creek-0001 787469 bytes, 879 strokes, 11 regions; mountain-lake-0002 807996 bytes, 1076 strokes, 13 regions. Sky plus ground alone already render to about 390 KB at 4:3 with the preset density.\n\nReview repair: Round 2 scenes render larger than the V1 examples T036 measured\nNew measurements for T036 from the three round 2 acceptance scenes, each rendered once at 4:3: coastal-headland-0001 under coastal-v1 is 1241147 bytes for 1086 strokes, urban-tram-street-0001 under urban-v1 is 1117617 bytes for 1425 strokes, skatepark-bowl-0001 under skatepark-v1 is 510362 bytes for 484 strokes. The denser tuned families (urban field spacing 4.5, coastal water jitter 0.8) push round 2 scenes past the 754 KB to 808 KB the task already records for the V1 examples, so the 100 KB target is further away than the recorded evidence states.\nEvidence: Render metrics read from result.trace.metrics of the three scenes in packages/renderer-svg/test/presets-round2.test.ts and scenes-round2.test.ts, seed 20261107, canvas 1024x768.",
+      "files": [
+        "examples/golden/mountain-lake-0002.svg",
+        "examples/golden/pastoral-creek-0001.svg",
+        "packages/export/test/pdf.test.ts",
+        "packages/geometry/src/simplify.ts",
+        "packages/renderer-svg/src/format.ts",
+        "packages/renderer-svg/src/index.ts",
+        "packages/renderer-svg/src/path-data.ts",
+        "packages/renderer-svg/src/render.ts",
+        "packages/renderer-svg/src/strokes.ts",
+        "packages/renderer-svg/test/debug.test.ts",
+        "packages/renderer-svg/test/format.test.ts",
+        "packages/renderer-svg/test/path-data.test.ts",
+        "packages/renderer-svg/test/render.test.ts",
+        "packages/renderer-svg/test/strokes.test.ts",
+        "tests/v1-release-gate.test.ts",
+        "tests/visual/baselines/mountain-lake-0002-debug-overlays.png",
+        "tests/visual/baselines/mountain-lake-0002-urban-v1.png",
+        "tests/visual/baselines/mountain-lake-0002.png",
+        "tests/visual/baselines/pastoral-creek-0001.png"
+      ],
+      "tags": [
+        "looper:finding:svg-output-size"
+      ],
+      "updated_at": "2026-11-07T12:06:52Z"
+    },
+    {
+      "id": "T037",
+      "title": "Object style zones do not occlude each other, so background hatch draws through foreground objects",
+      "priority": 3,
+      "status": "done",
+      "details": "Acceptance: the style application stage must give object style zones the same occlusion treatment the planned scene regions already get. When an object drawn later (higher zIndex) covers an object zone drawn earlier, the earlier zone's hatch must stop at the covering object's silhouette, so no hatch field draws through an object in front of it. A regression test must render two overlapping objects and assert that the lower zIndex zone carries no hatch stroke inside the higher object's silhouette, mirroring the existing carve behavior of the sky and ground regions.\nEvidence: applySceneStyle composes only the planned regions with object silhouettes (packages/core/src/engine.ts:359-364 passes masks: silhouettes to composeRegion) while object zones are pushed raw with no masks (packages/core/src/engine.ts:373-386); composeRegion already supports mask carving (packages/geometry/src/compose.ts:57-58, subtractMasks), so the mechanism exists but is not wired for object zones. Executable checks against the built dist at d88d5dd: in a house-over-hill scene (seed 7) 23 of 63 hill-zone strokes put 730 of 6526 vertices inside the house wall polygon; in the five-object scene (seed 20261107) 41 of 105 mountain face strokes and 38 of 44 mountain shade strokes cross the tree canopy polygon; in a house-only scene 0 of 107 sky strokes and 0 of 52 ground strokes fall inside the wall polygon, which proves the asymmetry. A 3x crop of a house standing in front of a mountain shows the mountain's diagonal hatch inside the wall band as a second, crossing line system.\n\nReview repair: Object style zones do not occlude each other, so background hatch draws through foreground objects\nThe example scenes make the T037 finding visible in committed fixtures: background hatch fields (mountain faces, hill) draw through the silhouettes of foreground objects, because object style zones get no occlusion treatment while the planned sky and ground regions do. Fixing T037 changes the golden fixtures, so regenerate them in the same change.\nEvidence: Visual inspection of examples/output/pastoral-creek-0001.png: the tree canopy hatch tangles with the massif slope hatch, and the cottage roof hatch crosses the mountain hatch. applySceneStyle passes masks only for the planned regions (packages/core/src/engine.ts).",
+      "files": [
+        "examples/golden/mountain-lake-0002.svg",
+        "examples/golden/pastoral-creek-0001.svg",
+        "packages/core/src/engine.ts",
+        "packages/core/test/engine.test.ts",
+        "packages/renderer-svg/test/occlusion.test.ts",
+        "tests/visual/baselines/mountain-lake-0002-debug-overlays.png",
+        "tests/visual/baselines/mountain-lake-0002-urban-v1.png",
+        "tests/visual/baselines/mountain-lake-0002.png",
+        "tests/visual/baselines/pastoral-creek-0001.png"
+      ],
+      "tags": [
+        "looper:finding:object-zone-occlusion"
+      ],
+      "updated_at": "2026-11-07T16:52:06Z"
+    },
+    {
+      "id": "T038",
+      "title": "styleOverrides cannot express a nested partial style change",
+      "priority": 4,
+      "status": "blocked",
+      "details": "Acceptance: a scene spec must state a one-field style change, for example 'same style but denser sky hatching' (specification section 8) or the setStyle path 'hatchFamilies.sky.spacing' (specification section 21), without restating the whole section or inlining preset values. StyleOverridesSchema must accept partial nested sections, preset resolution must deep-merge overrides over the preset, and a test must render a spec whose override changes one field and assert the resolved style keeps every other preset value. Task T023 (setStyle edit operation) needs this or must inline whole preset sections into specs.\nEvidence: packages/core/src/style.ts:125 defines StyleOverridesSchema = StyleSpecSchema.partial(), a top-level partial only. renderScene with styleOverrides { hatchFamilies: { sky: { spacing: 3 } } } throws 'styleOverrides.hatchFamilies.sky.angle: Invalid input: expected number, received undefined' and four more field errors; a complete single sky family is still rejected because the other five families are missing ('styleOverrides.hatchFamilies.field: Invalid input: expected object, received undefined' and so on). The working path restates all 6 families and 30 fields: with it, sky spacing 7 becomes 3 and the stroke count rises from 154 to 291, so overrides do apply once complete. resolveFromRegistry merges shallowly ({ ...base, ...overrides }, packages/core/src/engine.ts:493), so a deep-partial schema alone would not be enough; the merge needs the same depth. packages/styles/README.md documents the current whole-section replacement with a spread workaround. No backlog task covers override granularity.",
+      "blockers": [
+        "Deferred: T038 ships: StyleOverridesSchema accepts nested partial sections and preset resolution deep-merges overrides."
+      ],
+      "tags": [
+        "looper:deferred",
+        "looper:finding:style-overrides-nested-partial"
+      ],
+      "unblock_when": "T038 ships: StyleOverridesSchema accepts nested partial sections and preset resolution deep-merges overrides.; remove looper:deferred and set todo when this condition is met."
+    },
+    {
+      "id": "T039",
+      "title": "Give co-filled zone roles distinct hatch families when a scene needs them",
+      "priority": 4,
+      "status": "blocked",
+      "details": "Six zone roles arrived in T020 but the V1 style grammar has six hatch families, so five role pairs share a fill: architecture/pavement on field, roof/concrete on mountain, rock/metal on cliff, water/glass on water, foliage/shadow on foliage. In one preset, a road band and a building wall hatch identically. T021 can separate them by tuning families per scene type; a later round can add families to the core grammar (HatchFamiliesSchema requires every family in every preset, so that change touches @hatch/core and @hatch/styles).\nEvidence: packages/objects/src/roles.ts maps the six new roles onto existing families; packages/objects/README.md documents the limitation under \"The generators\".",
+      "depends_on": [
+        "T021"
+      ],
+      "blockers": [
+        "Deferred: Round 3 style work starts, or a round 2 preset needs two roles of one scene to carry distinct fills",
+        "Deferred: Round 3 style work starts, or a scene needs two roles of one scene to carry distinct fills"
+      ],
+      "tags": [
+        "looper:deferred",
+        "looper:finding:looper:finding:zone-role-family-collision",
+        "looper:finding:zone-role-family-collision"
+      ],
+      "unblock_when": "Round 3 style work starts, or a scene needs two roles of one scene to carry distinct fills; remove looper:deferred and set todo when this condition is met."
+    },
+    {
+      "id": "T040",
+      "title": "Wire PDF export into the example renderer and the release gate artifact list",
+      "priority": 5,
+      "status": "done",
+      "details": "examples/render.mjs and tests/v1-release-gate.test.ts still write and assert exactly three artifacts per scene (svg, png, trace.json). Wiring svgToPdf into the script would surface the PDF export in the human example outputs, and the gate's expected-file list must then grow to four artifacts per scene (an extension of the gate, not a weakening). .gitignore already covers examples/output/ PDFs.\nEvidence: tests/v1-release-gate.test.ts asserts [`${id}.svg`, `${id}.png`, `${id}.trace.json`] exactly; examples/render.mjs calls svgToPng but not svgToPdf; .gitignore line 'examples/output/' already names PNG and PDF exports.",
+      "files": [
+        "README.md",
+        "examples/README.md",
+        "examples/render.mjs",
+        "tests/README.md",
+        "tests/v1-release-gate.test.ts"
+      ],
+      "tags": [
+        "looper:finding:pdf-export-examples-wiring"
+      ],
+      "updated_at": "2026-11-07T09:54:03Z"
+    },
+    {
+      "id": "T041",
+      "title": "interior-v1 remains the one unshipped preset of specification section 11",
+      "priority": 4,
+      "status": "blocked",
+      "details": "Specification section 11 lists five presets for @hatch/styles. Round 2 shipped coastal-v1, urban-v1, and skatepark-v1; interior-v1 is the one that remains. The scene schema already accepts environment.type \"interior\", so only the preset is missing. Nothing in the V2 checklist of section 24 names it, so it belongs to a later round that renders interior scenes, for example the V3 prompt-to-spec planner handling the interior coffee shop intent of section 1.\nEvidence: docs/SPEC.md section 11 lists interior-v1 among the @hatch/styles presets; packages/styles/test/presets.test.ts asserts hasStylePreset(\"interior-v1\") is false and uses it as the unknown-preset probe; no backlog task mentions interior-v1.",
+      "blockers": [
+        "Deferred: A round needs an interior scene, for example the V3 prompt-to-spec planner rendering an interior coffee shop scene",
+        "Deferred: A round needs an interior scene, for example the V3 prompt-to-spec planner rendering the interior coffee shop scene"
+      ],
+      "tags": [
+        "looper:deferred",
+        "looper:finding:interior-v1-preset"
+      ],
+      "unblock_when": "A round needs an interior scene, for example the V3 prompt-to-spec planner rendering the interior coffee shop scene; remove looper:deferred and set todo when this condition is met."
+    },
+    {
+      "id": "T042",
+      "title": "Seven scene spec fields are accepted but never read, so camera and composition controls are inert",
+      "priority": 3,
+      "status": "done",
+      "details": "Acceptance: the fields camera.framing, camera.lens, camera.tilt, camera.perspectiveStrength, composition.balance, composition.depthLayers, and composition.focalPoints (specification section 5) must either drive planning and rendering or be rejected by validation as unsupported. Today the Zod schema accepts them, the spec hash consumes them, and no stage reads them, so a spec that says framing 'close' or lens 'ultra-wide' renders the same composition as the default while the seed perturbation makes the bytes differ, which hides the gap. No backlog task owns this consumption; T025 will write these fields from prompts and T028 validates focal counts, but neither task makes the render honor them, so prompt-driven camera control would still be inert after V3.\nEvidence: grep across packages/*/src finds framing, lens, tilt, perspectiveStrength, balance, depthLayers, and focalPoints only in packages/core/src/scene.ts:59-68 (the schema); plan.ts reads camera.horizonY only (packages/core/src/plan.ts:191). Executable check at this revision: setting each field in pastoral-creek-0001 (framing close, lens ultra-wide, tilt 0.4, perspectiveStrength 0.9, balance right, depthLayers 1, focalPoints []) leaves the structure constant (11 regions, 37 contours every time) with only small stroke-count drift (879 to 916), because each edit changes the specHash embedded in the SVG metadata and therefore the seeded RNG stream; the metadata line read from examples/output/pastoral-creek-0001.svg confirms the specHash is part of the render identity.",
+      "files": [
+        "README.md",
+        "examples/golden/mountain-lake-0002.svg",
+        "examples/golden/pastoral-creek-0001.svg",
+        "packages/core/src/camera.ts",
+        "packages/core/src/engine.ts",
+        "packages/core/src/index.ts",
+        "packages/core/src/ir.ts",
+        "packages/core/src/plan.ts",
+        "packages/core/src/scene.ts",
+        "packages/core/test/camera.test.ts",
+        "packages/core/test/engine.test.ts",
+        "packages/core/test/plan.test.ts",
+        "packages/objects/src/placement.ts",
+        "packages/objects/src/scene-object.ts",
+        "packages/objects/test/generator.test.ts",
+        "packages/renderer-svg/src/debug.ts",
+        "packages/renderer-svg/test/camera-controls.test.ts",
+        "packages/renderer-svg/test/pipeline.test.ts",
+        "tests/visual/baselines/mountain-lake-0002-debug-overlays.png",
+        "tests/visual/baselines/mountain-lake-0002-urban-v1.png",
+        "tests/visual/baselines/mountain-lake-0002.png",
+        "tests/visual/baselines/pastoral-creek-0001.png"
+      ],
+      "tags": [
+        "looper:finding:scene-camera-composition-controls-inert"
+      ],
+      "updated_at": "2026-11-07T09:12:32Z"
+    },
+    {
+      "id": "T043",
+      "title": "The objectGrammar style section is dead configuration in every preset",
+      "priority": 4,
+      "status": "done",
+      "details": "Acceptance: the objectGrammar fields of specification section 8 (abstractionLevel, maxDetailPerObject, edgeRoundnessBias, keepNegativeSpace) must affect geometry synthesis, style application, or rendering, or validation must state they are reserved. All four shipped presets define them and the StyleSpec schema requires them, but no generator, style stage, or renderer reads any of them, so the object grammar named in the goal and in section 3.C (simplification rules, detail limits, negative space in objects) is carried but never enforced. No backlog task owns the wiring; T015 and T020 generators are done without it, and T025 needs it for the 'what level of detail is acceptable' decisions of section 18.\nEvidence: grep over packages/*/src finds abstractionLevel, maxDetailPerObject, edgeRoundnessBias, and keepNegativeSpace only in packages/core/src/style.ts (the schema) and the four preset files (pastoral-v1, coastal-v1, urban-v1, skatepark-v1); there are no reads in engine.ts, plan.ts, or packages/objects/src. Executable check: a styleOverrides block that replaces the whole objectGrammar section (allowed today as a complete section) with flipped values (abstractionLevel 0.99, maxDetailPerObject 1, edgeRoundnessBias 0.99, keepNegativeSpace toggled) leaves the render at 11 regions and 37 contours with stroke count drifting 879 to 891 from the seed change alone.",
+      "files": [
+        "examples/golden/mountain-lake-0002.svg",
+        "examples/golden/pastoral-creek-0001.svg",
+        "packages/core/src/engine.ts",
+        "packages/core/src/index.ts",
+        "packages/core/src/object-grammar.ts",
+        "packages/core/src/plan.ts",
+        "packages/core/src/style.ts",
+        "packages/core/test/object-grammar.test.ts",
+        "packages/geometry/src/index.ts",
+        "packages/geometry/src/round.ts",
+        "packages/geometry/test/round.test.ts",
+        "packages/objects/README.md",
+        "packages/objects/src/generator.ts",
+        "packages/objects/src/grammar.ts",
+        "packages/objects/src/house.ts",
+        "packages/objects/src/index.ts",
+        "packages/objects/src/scene-object.ts",
+        "packages/objects/test/grammar.test.ts",
+        "packages/styles/README.md",
+        "pnpm-lock.yaml",
+        "tests/object-grammar-gate.test.ts",
+        "tests/package.json",
+        "tests/visual/baselines/mountain-lake-0002-debug-overlays.png",
+        "tests/visual/baselines/mountain-lake-0002-urban-v1.png",
+        "tests/visual/baselines/mountain-lake-0002.png",
+        "tests/visual/baselines/pastoral-creek-0001.png"
+      ],
+      "tags": [
+        "looper:finding:object-grammar-inert"
+      ],
+      "updated_at": "2026-11-07T21:41:32Z"
+    },
+    {
+      "id": "T044",
+      "title": "Thumbnails and preview sheets of section 11 have no owning task",
+      "priority": 5,
+      "status": "blocked",
+      "details": "Specification section 11 scopes @hatch/export to SVG to PNG, SVG to PDF, thumbnails, and preview sheets. The first two landed with T018 and T030. The package entry module states that thumbnails and preview sheets 'build on the two conversions once a task asks for them', and no task in the accepted backlog asks for them, so the capability is missing ownership rather than scheduled work: it appears in no V1 to V3 checklist and in no task, deferred or otherwise. Either a task should own them or the package scope note should record them as out of scope for the accepted rounds.\nEvidence: packages/export/src/index.ts:4-9 and packages/export/package.json description name thumbnails and preview sheets with the deferral note 'once a task asks for them'; a grep over the repository finds no implementation and a grep over the backlog finds no task that names them. Resume condition for later rounds: a round that needs contact-sheet or thumbnail output, for example the T026 export panel or agent scene galleries.",
+      "blockers": [
+        "execution: signal: terminated; see /home/agent/.looper/hatch-04810ba9/runtime/task-3fc84772e512d23a/work-00-session-dad4695fc32ac1f5/events-00.jsonl"
+      ],
+      "tags": [
+        "looper:finding:export-thumbnails-preview-sheets-unowned"
+      ],
+      "updated_at": "2026-11-07T12:56:02Z",
+      "unblock_when": "Resolve the recorded condition and set this task to todo."
+    },
+    {
+      "id": "T045",
+      "title": "Scene spec fields environment.ground, environment.atmosphere, and SceneObject.styleRole are accepted but never read",
+      "priority": 3,
+      "status": "done",
+      "details": "Acceptance: each of the three fields must either drive planning, geometry synthesis, style application, or rendering, or be rejected by validation as reserved, mirroring the T042 decision for the camera and composition fields. A regression test must render a spec that sets each field and assert the documented effect or the rejection, so a spec that asks for fog or a named style role cannot silently render an unchanged composition. This is a current-round core gap in the exact class of T042: the fields are parsed, they enter the spec hash, and the hash change alone perturbs the seeded render bytes, which hides the inertness from a byte comparison. Round 3 depends on it too: the T025 planner will want to write atmosphere blocks and object style roles from prompts.\nEvidence: packages/core/src/scene.ts:95-100 declares EnvironmentSchema with optional free-form ground and atmosphere blocks (JsonObjectSchema), and scene.ts:38 declares styleRole. A grep over packages/*/src finds environment.sky read exactly once (cloudCount, packages/core/src/plan.ts:305-321) and zero reads of environment.ground, environment.atmosphere, or styleRole. Executable probe against the built dist: adding environment.ground {material, wetness} and environment.atmosphere {fog, haze, rain} to examples/scenes/pastoral-creek-0001.json changes the specHash and the SVG bytes (736931 to 725805 bytes) while the render stays at 11 regions and every region fill style compares identical; setting styleRole 'sky hatch' on one object likewise changes only specHash and bytes (11 regions, region fill styles identical). No repository document marks the fields reserved, and a grep over the accepted backlog finds no task naming atmosphere, environment.ground, or styleRole.",
+      "files": [
+        "README.md",
+        "packages/agent/test/edits.test.ts",
+        "packages/core/src/engine.ts",
+        "packages/core/src/environment.ts",
+        "packages/core/src/index.ts",
+        "packages/core/src/plan.ts",
+        "packages/core/src/scene.ts",
+        "packages/core/src/style-role.ts",
+        "packages/core/test/environment.test.ts",
+        "packages/core/test/fixtures.ts",
+        "packages/renderer-svg/src/pipeline.ts",
+        "packages/renderer-svg/test/environment-style-role.test.ts"
+      ],
+      "tags": [
+        "looper:finding:scene-environment-style-role-inert"
+      ],
+      "updated_at": "2026-11-07T17:28:39Z"
+    },
+    {
+      "id": "T046",
+      "title": "Coastal object kinds the specification names have no generator and no owning task",
+      "priority": 4,
+      "status": "done",
+      "details": "Acceptance: either a task owns the coastal object kinds (at minimum the lighthouse; cliff and rock also appear in the section 5 kind list and the section 16 classification) so the coastal intent of sections 1 and 14 renders, or the objects package records them as out of scope for the accepted rounds. This is future-round work, not a gate for rounds 1 and 2: no V1 to V3 checklist item names these kinds. Resume condition: a round that renders coastal scenes, for example the V3 prompt-to-spec planner (T025) handling the 'coastal lighthouse scene' intent of section 1 and the section 14 Mode 1 example 'coastal scene with lighthouse, dramatic cliff, wide sky'.\nEvidence: docs/SPEC.md names the lighthouse at lines 20 (section 1 intent), 293 (section 5 kind list), 593 (section 11 @hatch/objects list), and 726 (section 14 example). The registry ships 17 kinds: V1_OBJECT_KINDS (house, tree, hill, mountain, water), SKATEPARK_OBJECT_KINDS (bowl, quarter-pipe, handrail, skater, fence, bench), and URBAN_OBJECT_KINDS (tram, building-block, streetlight, car, road, lamp-post), confirmed by import of packages/objects/dist. packages/objects/test/generator.test.ts:89-91 pins isObjectKind('lighthouse') as false. The shipped coastal-v1 preset is tuned for a lighthouse it cannot place ('One focal object, for example the lighthouse on the headland', packages/styles/src/coastal-v1.ts:152). A grep over the accepted backlog finds no task naming lighthouse, cliff, or rock, so the capability is missing ownership rather than scheduled or deferred work.",
+      "files": [
+        "packages/hatching/vitest.config.ts",
+        "packages/objects/README.md",
+        "packages/objects/src/cliff.ts",
+        "packages/objects/src/generator.ts",
+        "packages/objects/src/index.ts",
+        "packages/objects/src/lighthouse.ts",
+        "packages/objects/src/rock.ts",
+        "packages/objects/src/roles.ts",
+        "packages/objects/test/cliff.test.ts",
+        "packages/objects/test/generator.test.ts",
+        "packages/objects/test/lighthouse.test.ts",
+        "packages/objects/test/objects.test.ts",
+        "packages/objects/test/rock.test.ts",
+        "packages/objects/vitest.config.ts",
+        "packages/renderer-svg/test/pipeline.test.ts",
+        "packages/renderer-svg/test/scenes-coastal.test.ts",
+        "packages/renderer-svg/vitest.config.ts",
+        "packages/styles/README.md",
+        "tests/vitest.config.ts"
+      ],
+      "tags": [
+        "looper:finding:coastal-object-kinds-unowned"
+      ],
+      "updated_at": "2026-11-07T19:14:09Z"
+    },
+    {
+      "id": "T047",
+      "title": "Object zone occlusion carves by depth order but the renderer paints by authored zone zIndex, so the two can disagree",
+      "priority": 4,
+      "status": "done",
+      "details": "The T037 carve follows the depth order of the plan (role depth, then spec order), while the renderer stacks regions by each zone's authored zIndex. The generators author zone zIndexes in a 5-to-20 band that mixes intra-object layering with values that also order objects against each other: hill 5, road and water 6, mountain faces 8-10, house wall 10 to chimney 14, tree canopy 20. A scene where the two orders disagree paints the nearer object under the farther one: a foreground road (zIndex 6) overlapping a midground house wall (zIndex 10) gets its pavement hatch carved correctly for depth (the road never carves) but painted under the wall. Align the two, either by rebasing every zone's authored zIndex onto its object's depth plane or by ordering the carve on the same zIndex the renderer paints with.\nEvidence: packages/objects/src/hill.ts:178 sets zIndex 5 while packages/objects/src/house.ts:297 sets the wall at 10 and packages/objects/src/tree.ts:251 the canopy at 20; packages/core/src/engine.ts applySceneStyle carves with silhouettes.slice(index + 1) over the depth-ordered geometry, and the renderer sorts by region zIndex. No test in the suite renders two objects whose zone zIndex order contradicts their role depth.\n\nReview repair: Coastal sea waterline draws over the background cliff by depth order\nOn coastal scenes, the midground sea draws its waterline over the background cliff because the depth model places it in front. This matches the fill carve of T037 and is now consistent for contours. T047 (looper:finding:object-zone-zindex-vs-depth-order) already tracks the depth-order versus zIndex disagreement that governs this reading; no new task is needed.\nEvidence: Numeric probe on coastal-lighthouse-0003 (seed 20261107): sea contour points deeper than 1 unit inside rock-1 fell from 77 to 4 and inside rock-2 from 496 to 8 after the carve; every residual point sits at depth 0 (on the silhouette). Sea-versus-cliff crossings stayed at 229, which the depthOrder [cliff-1, sea-1, rock-1, rock-2, lighthouse-1] explains: the sea stands in front, so its ink correctly covers the cliff, the same way its fill already did.",
+      "files": [
+        "README.md",
+        "examples/golden/mountain-lake-0002.svg",
+        "examples/golden/pastoral-creek-0001.svg",
+        "packages/core/src/engine.ts",
+        "packages/core/test/engine.test.ts",
+        "packages/objects/README.md",
+        "packages/renderer-svg/README.md",
+        "packages/renderer-svg/test/environment-style-role.test.ts",
+        "packages/renderer-svg/test/zone-stack.test.ts",
+        "tests/visual/baselines/mountain-lake-0002-debug-overlays.png",
+        "tests/visual/baselines/mountain-lake-0002-urban-v1.png",
+        "tests/visual/baselines/mountain-lake-0002.png"
+      ],
+      "tags": [
+        "looper:finding:object-zone-zindex-vs-depth-order",
+        "looper:finding:coastal-sea-over-cliff-waterline-depth-order"
+      ],
+      "updated_at": "2026-11-07T22:14:42Z",
+      "unblock_when": "\"\""
+    },
+    {
+      "id": "T048",
+      "title": "composition.negativeSpace is required by the schema, shown in the editor, and never read by the compiler",
+      "priority": 3,
+      "status": "done",
+      "details": "Acceptance: composition.negativeSpace (specification sections 5, 8, 15, 18, 19) must drive planning, style application, or rendering, or validation must reject it as reserved, mirroring the T042 decision for the seven camera and composition fields and the T045 decision for environment fields. A regression test must render two specs that differ only in negativeSpace and assert the documented effect or the rejection. The README control list and the editor field must match the decision. The natural consumers are the planning stage (layout spread or hatch density moderation), the T028 negative-space validator, or the T025 style-aware planner; no existing task names this field, so the field-level decision has no owner.\nEvidence: packages/core/src/scene.ts:90-93 declares negativeSpace as a required field of CompositionSchema. The only read in the whole source tree is packages/core/src/engine.ts:866, which copies the value into the planning trace event as negativeSpaceGoal. Executable probe against the built dist at 0cc69c7: pastoral-creek-0001 with negativeSpace 0.05 renders 72827 bytes, 11 regions, 697 strokes; with 0.95 it renders 73571 bytes, 11 regions, 726 strokes; the region fill styles compare identical and only the seeded streams move, because the value changes the spec hash. The editor exposes the inert control to users: packages/ui/src/components/CompositionControls.tsx:157-167, field label 'negative space', testId negative-space, dispatching patchComposition. README.md documents the effect of all seven T042/T045 controls but never mentions negativeSpace. Specification section 15 names 'increase empty space' as an example edit and section 8 names 'same style, coastal palette, less empty space' as an example override; neither can change the picture today.",
+      "files": [
+        "README.md",
+        "examples/golden/mountain-lake-0002.svg",
+        "packages/core/src/camera.ts",
+        "packages/core/src/engine.ts",
+        "packages/core/src/index.ts",
+        "packages/core/src/negative-space.ts",
+        "packages/core/src/plan.ts",
+        "packages/core/src/scene.ts",
+        "packages/core/test/fixtures.ts",
+        "packages/core/test/negative-space.test.ts",
+        "packages/renderer-svg/test/negative-space.test.ts",
+        "packages/renderer-svg/test/pipeline.test.ts",
+        "packages/renderer-svg/test/scenes-round2.test.ts",
+        "packages/ui/e2e/editor.spec.ts",
+        "packages/ui/src/components/CompositionControls.tsx",
+        "tests/visual/baselines/mountain-lake-0002-urban-v1.png",
+        "tests/visual/baselines/mountain-lake-0002.png"
+      ],
+      "tags": [
+        "looper:finding:composition-negative-space-inert"
+      ],
+      "updated_at": "2026-11-07T18:07:44Z"
+    },
+    {
+      "id": "T049",
+      "title": "environment.sky silently accepts keys the compiler does not read",
+      "priority": 4,
+      "status": "done",
+      "details": "Acceptance: the sky reader must reject every key it does not read, by name, the way the T045 environment model rejects unread ground and atmosphere keys, so a spec that asks for environment.sky.storminess fails with an actionable message instead of perturbing only the spec hash and the seeded bytes. A regression test must render a spec carrying an unread sky key and assert the rejection.\nEvidence: packages/core/src/plan.ts:326-347 (cloudCountOf) reads only cloudCount and validates its value; sibling keys pass unvalidated. The scene schema comment (packages/core/src/scene.ts:101-109) states each environment block 'has one reader that owns its vocabulary', and packages/core/src/environment.ts:4-10 names the free-form-block trap and rejects unread keys for ground and atmosphere only. Executable probe at 0cc69c7: adding storminess 0.9 and cloudShape 'cumulus' to pastoral-creek-0001 (cloudCount 3) renders without error at 71792 bytes (base 71598), same 11 regions and 3 clouds, stroke drift from the seed move alone.",
+      "files": [
+        "README.md",
+        "packages/core/src/environment.ts",
+        "packages/core/src/index.ts",
+        "packages/core/src/plan.ts",
+        "packages/core/src/scene.ts",
+        "packages/core/test/environment.test.ts",
+        "packages/core/test/plan.test.ts",
+        "packages/renderer-svg/test/environment-style-role.test.ts"
+      ],
+      "tags": [
+        "looper:finding:environment-sky-unread-keys"
+      ],
+      "updated_at": "2026-11-07T19:12:08Z",
+      "unblock_when": "\"\""
+    },
+    {
+      "id": "T050",
+      "title": "Raise the per-test timeout of the slow seeded sweeps above the Vitest 5 s default",
+      "priority": 3,
+      "status": "done",
+      "details": "The unit-test step of scripts/verify.mjs runs every workspace suite under Vitest's 5000 ms default per-test timeout. On the shared machine (8 cores, load average 13 to 20 from other sessions) three tests crossed the limit while their assertions held: packages/objects test/bowl.test.ts 'returns non-empty geometry inside its bounds across seeded samples' (5.2 to 6.5 s under load), packages/hatching test/engine.test.ts 'refuses a spacing that asks for a near-infinite field' (5.1 to 8.4 s under load), and four renderer-svg tests (5.2 to 6.7 s) when packages run at once. Each passes in under a second to six seconds when its package runs alone. Fix options: a per-package vitest.config.ts with a raised testTimeout for the seeded sweeps, or a per-test timeout option on the sweep tests. Assertions stay unchanged; only the wall-clock budget moves.\nEvidence: Three pnpm verify runs failed at 'gate: unit tests' on these timeouts and nothing else; the fourth run passed every gate with identical sources (1168 unit tests). packages/hatching engine.test.ts measured 734 to 781 ms alone, 5121 to 8412 ms inside the full gate step. bowls sweep passes with vitest --testTimeout=30000. The T049 diff touches no objects, hatching, or renderer-svg source path.",
+      "files": [
+        ".gitignore",
+        "packages/ui/tsconfig.json",
+        "packages/ui/vitest.config.ts",
+        "tests/vitest-budget-gate.test.ts",
+        "tsconfig.json"
+      ],
+      "tags": [
+        "looper:finding:verify-unit-tests-timeout-flake"
+      ],
+      "updated_at": "2026-11-07T19:43:48Z",
+      "unblock_when": "\"\""
+    },
+    {
+      "id": "T051",
+      "title": "Separate the sky and sea hatch textures of coastal-v1",
+      "priority": 2,
+      "status": "blocked",
+      "details": "One vision pass over the rendered coastal scene noted the sky hatch and the sea hatch read as one diagonal texture, so the horizon edge reads faintly. This is coastal-v1 preset tuning (sky hatch angle 25 against the water 5/95 crosshatch), not an object gap. T046 verified the scene renders and reads correctly; this note is polish for the next styles pass.\nEvidence: Vision critique of render coastal-lighthouse-0003 (2026-11-07): sky hatching and sea hatching share one diagonal texture, so the horizon boundary near y 200 reads faintly. Preset values: packages/styles/src/coastal-v1.ts hatchFamilies.sky.angle 25, hatchFamilies.water 5/95.",
+      "blockers": [
+        "Deferred: The next pass that tunes the coastal-v1 preset or the core family grammar."
+      ],
+      "tags": [
+        "looper:deferred",
+        "looper:finding:coastal-sky-sea-separation"
+      ],
+      "unblock_when": "The next pass that tunes the coastal-v1 preset or the core family grammar.; remove looper:deferred and set todo when this condition is met."
+    },
+    {
+      "id": "T052",
+      "title": "Object contour strokes are never occluded by nearer objects, so content lines of a background object draw through a foreground object",
+      "priority": 3,
+      "status": "done",
+      "details": "Acceptance: the contour and internal-boundary strokes of an object must stop at the silhouette of every object drawn in front of it, mirroring the fill carve T037 added, or the renderer must record the contour layer's placement as a deliberate style decision with the crossing restricted to outlines. A regression test must render a rear object whose internal boundaries (for example sea wave lines) cross a front object and assert the contour strokes stop at the front silhouette, the way occlusion.test.ts asserts it for hatch fills.\nEvidence: packages/renderer-svg/src/render.ts:5 and render.ts:199 draw the whole contour layer on top of every region; packages/core/src/engine.ts:631-662 strokes object contours and internal boundaries with no silhouette masks, in contrast to the region composition that passes masks. Executable probe (scene 'occlusion-probe', seed 7, midground sea with waveLines 9 behind a foreground rock): the sea fill strokes put 5 points total inside the rock polygon (boundary wobble only, T037 carve works) while the sea's wave contour lines put 92 points inside, one line with all 47 of its sampled points inside the rock polygon. The existing occlusion.test.ts scope is 'stops the lower zone's hatch' (fills only); no test covers contours. A vision pass over the shipped coastal scene of T046 flagged the same effect: horizontal water strokes break up the smaller right-hand rock and the waterline appears in front of the rocks in places.",
+      "files": [
+        "README.md",
+        "examples/golden/mountain-lake-0002.svg",
+        "examples/golden/pastoral-creek-0001.svg",
+        "packages/core/src/engine.ts",
+        "packages/core/src/ir.ts",
+        "packages/core/test/engine.test.ts",
+        "packages/geometry/src/clip.ts",
+        "packages/geometry/test/clip.test.ts",
+        "packages/renderer-svg/README.md",
+        "packages/renderer-svg/src/pipeline.ts",
+        "packages/renderer-svg/test/contour-occlusion.test.ts",
+        "tests/visual/baselines/mountain-lake-0002-debug-overlays.png",
+        "tests/visual/baselines/mountain-lake-0002-urban-v1.png",
+        "tests/visual/baselines/mountain-lake-0002.png",
+        "tests/visual/baselines/pastoral-creek-0001.png"
+      ],
+      "tags": [
+        "looper:finding:object-contours-not-occluded"
+      ],
+      "updated_at": "2026-11-07T20:29:52Z"
+    },
+    {
+      "id": "T053",
+      "title": "environment.type is accepted, hashed, and traced but read by no stage, the same inert-field class T042, T045, and T048 fixed",
+      "priority": 3,
+      "status": "done",
+      "details": "Acceptance: composition of the environment block must either drive a decision (for example preset-family validation or planner defaults) or validation must reject unsupported values as reserved, with a regression test that renders two specs differing only in environment.type and asserts the documented effect or the rejection. The README control list must state the decision. The T025 planner will write environment.type from prompts, so the field needs an owner before round 3 consumes it.\nEvidence: A grep over packages/*/src finds the only read at packages/core/src/engine.ts:880, which copies the value into the planning trace event; plan.ts, environment.ts, and the generators never read it. Executable probe at 63dc621: pastoral-creek-0001 with environment.type rural, coastal, interior, and custom renders 11 regions with byte-identical region fills each time, while strokes drift 709/727/720/702 from the spec-hash seed move alone, so the gap hides from a byte comparison. T045 covered environment.ground, environment.atmosphere, and styleRole; T049 covered sky keys; no backlog task names environment.type (T041 mentions it only as schema acceptance).",
+      "files": [
+        "README.md",
+        "packages/core/src/engine.ts",
+        "packages/core/src/environment.ts",
+        "packages/core/src/scene.ts",
+        "packages/core/src/style.ts",
+        "packages/core/test/engine.test.ts",
+        "packages/core/test/environment.test.ts",
+        "packages/renderer-svg/test/edit-operations.test.ts",
+        "packages/renderer-svg/test/environment-type.test.ts",
+        "packages/renderer-svg/test/presets-round2.test.ts",
+        "packages/styles/README.md",
+        "packages/styles/src/coastal-v1.ts",
+        "packages/styles/src/index.ts",
+        "packages/styles/src/pastoral-v1.ts",
+        "packages/styles/src/skatepark-v1.ts",
+        "packages/styles/src/urban-v1.ts",
+        "packages/styles/test/presets.test.ts",
+        "packages/ui/src/editor/state.ts",
+        "packages/ui/test/state.test.ts",
+        "tests/visual/baselines/mountain-lake-0002-urban-v1.png",
+        "tests/visual/scenes.ts"
+      ],
+      "tags": [
+        "looper:finding:environment-type-inert"
+      ],
+      "updated_at": "2026-11-07T20:59:03Z",
+      "unblock_when": "\"\""
+    },
+    {
+      "id": "T054",
+      "title": "The trace reports spacingMultiplierClamped true for below-floor negative-space asks that never touch the minimum",
+      "priority": 4,
+      "status": "done",
+      "details": "Acceptance: the clamp flag must be true only when the raw multiplier falls below MIN_NEGATIVE_SPACE_SPACING (0.3). A unit test must cover a below-floor ask that does not clamp (multiplier above 0.3, flag false) beside the existing genuine-clamp case, so the trace statement 'the planning event records the clamp' stays truthful.\nEvidence: packages/core/src/negative-space.ts:108 computes spacingMultiplierClamped as spacingMultiplier !== raw, where spacingMultiplier is the value rounded to 4 decimals; any float residue flips the flag. Executable probe: pastoral-v1 (floor 0.35) with negativeSpace 0, 0.1, and 0.2 records {spacingMultiplier: 0.58/0.7/0.82, spacingMultiplierClamped: true} although 1 + 1.2 * (goal - floor) never approaches 0.3; goals 0.35 and 0.5 record false. Every shipped preset floors at 0.4 or lower (coastal 0.4, skatepark 0.3, urban 0.22, pastoral 0.35), so no goal in [0, 1] can trigger the real clamp: every true flag in the product today is a false positive. The two tests in packages/core/test/negative-space.test.ts:110-140 cover only goal 0.95 (no residue) and goal 0 against floor 1 (a genuine clamp no preset can reach).\n\nReview repair: The trace still reports spacingMultiplierClamped true for below-floor asks that never touch the minimum\nPer T054: the clamp flag must be true only when the raw multiplier falls below MIN_NEGATIVE_SPACE_SPACING (0.3), and a unit test must cover a below-floor ask that does not clamp beside the genuine-clamp case.\nEvidence: Reproduced at fc8e5b4: rendering pastoral-creek-0001 (floor 0.35) with composition.negativeSpace 0, 0.2, 0.35, 0.5, 0.95 records {goal 0: multiplier 0.58, clamped true}, {0.2: 0.82, true}, {0.35: 1, false}, {0.5: 1.18, false}, {0.95: 1.72, false}; no goal in [0,1] under floor 0.35 approaches the 0.3 minimum, so both true flags are false positives from float residue (packages/core/src/negative-space.ts compares the rounded multiplier against the raw). T054 is todo in the accepted backlog; this evidence attaches to it.",
+      "files": [
+        "packages/core/src/negative-space.ts",
+        "packages/core/test/negative-space.test.ts",
+        "packages/renderer-svg/test/negative-space.test.ts"
+      ],
+      "tags": [
+        "looper:finding:negative-space-clamp-flag-false-positive"
+      ],
+      "updated_at": "2026-11-07T22:44:57Z",
+      "unblock_when": "\"\""
+    },
+    {
+      "id": "T055",
+      "title": "Both exporters accept an unknown fit mode silently; the PDF converter misreads it as height and can emit a 1.33 x 1 point page",
+      "priority": 4,
+      "status": "done",
+      "details": "Acceptance: svgToPng and svgToPdf must reject a fit mode outside their documented set by name, the way they already reject non-finite and non-positive values, with one test per converter.\nEvidence: packages/export/src/png.ts checkedFit (lines 92-118) validates the value but never the mode; svgToPng(svg, { fit: { mode: 'bogus', value: 1 } }) returns the natural 1024 x 768 PNG with no error, exactly the silent-resvg-ignore class the module's own docblock (png.ts:23) says it rejects. packages/export/src/pdf.ts fitScale (lines 230-255) treats every mode that is not original, zoom, or width as height: svgToPdf(svg, { fit: { mode: 'bogus', value: 1 } }) returned a page of 1.3333333333333333 x 1 points, a nonsense document with no error. Verified at 63dc621 against the built dist.",
+      "files": [
+        "packages/export/src/pdf.ts",
+        "packages/export/src/png.ts",
+        "packages/export/test/pdf.test.ts",
+        "packages/export/test/png.test.ts"
+      ],
+      "tags": [
+        "looper:finding:export-fit-mode-unvalidated"
+      ],
+      "updated_at": "2026-11-07T20:13:34Z",
+      "unblock_when": "\"\""
+    },
+    {
+      "id": "T056",
+      "title": "The detail budget counts every kind the same, in emission order",
+      "priority": 3,
+      "status": "blocked",
+      "details": "applyObjectGrammar keeps the first round(maxDetailPerObject x (1 - abstractionLevel)) internal boundaries of every object in emission order, one uniform rule for all kinds. Generators emit structural lines first, so structure survives before texture, but a many-mark object of one kind (fence pickets, a building window grid) loses marks at the same ceiling as a plain cottage. A per-kind weighting, or a structural-versus-texture mark distinction in the generator contract, would let a fence keep its pickets while a cottage drops clutter.\nEvidence: packages/objects/src/grammar.ts slices internalBoundaries; packages/objects/test/grammar.test.ts pins the slice on the fence; the urban budget of 11 marks (round(14 x 0.75)) caps a building grid of up to 84 window marks.",
+      "blockers": [
+        "Deferred: A round opens that tunes presets against rendered output and a many-mark object (fence pickets, building window grid) loses structure to the budget."
+      ],
+      "tags": [
+        "looper:deferred",
+        "looper:finding:object-grammar-per-kind-budget"
+      ],
+      "unblock_when": "A round opens that tunes presets against rendered output and a many-mark object (fence pickets, building window grid) loses structure to the budget.; remove looper:deferred and set todo when this condition is met."
+    },
+    {
+      "id": "T057",
+      "title": "The trace never records what the object grammar omitted",
+      "priority": 4,
+      "status": "done",
+      "details": "Specification section 9B requires the layout-decision trace to state what was omitted due to style simplification. The geometry event records only the post-budget internal boundary count per object beside the budget number, so a reader cannot see how many marks the generator emitted or that the grammar dropped them. Acceptance: the geometry (or planning) trace records, per object, the emitted and kept internal boundary counts (or the dropped count) under the active grammar, with a unit test proving a budget-limited object reports its omissions.\nEvidence: docs/SPEC.md:486 lists 'what was omitted due to style simplification' under section 9B layout decisions. packages/objects/src/scene-object.ts:74-77 applies applyObjectGrammar inside generateSceneObject, and packages/core/src/engine.ts:1156 counts placed.internalBoundaries after that slice, so the pre-grammar count is lost before tracing. Executable probes at fc8e5b4: a building-block under an open grammar emits 6 internal boundaries while the urban-v1 grammar keeps 4, and a rendered urban scene (two buildings, tram, lamp-post) reports internalBoundaries 4/4/2/4 with detailBudget 4; a search of the whole trace JSON for omit/drop finds nothing. No backlog task covers the omission record; T056 covers per-kind budget weighting, a different outcome.",
+      "files": [
+        "README.md",
+        "packages/core/src/engine.ts",
+        "packages/core/src/object-grammar.ts",
+        "packages/core/test/object-grammar.test.ts",
+        "packages/objects/src/scene-object.ts",
+        "packages/objects/test/grammar.test.ts",
+        "packages/renderer-svg/test/scenes-round2.test.ts"
+      ],
+      "tags": [
+        "looper:finding:geometry-trace-omitted-marks"
+      ],
+      "updated_at": "2026-11-07T23:02:59Z",
+      "unblock_when": "\"\""
+    }
+  ]
+}

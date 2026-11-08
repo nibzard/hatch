@@ -1,0 +1,29 @@
+# Generated output
+node_modules/
+coverage/
+dist/
+build/
+*.tsbuildinfo
+.vite/
+# Vitest runner scratch, for example the JSON report a `--reporter=json`
+# run writes to `<package>/.vitest/json/output.json` instead of stdout.
+.vitest/
+test-results/
+playwright-report/
+# Playwright blob reports and its browser download cache, when a run keeps
+# them inside the repository. The committed golden images under
+# tests/visual/baselines/ are source, not output, and stay tracked.
+blob-report/
+playwright/.cache/
+*.log
+
+# Example render scratch: PNG and PDF exports the examples write at run
+# time (task T019). Golden SVG fixtures stay tracked.
+examples/output/
+
+# Run-time scratch of the loop runner: a private resource prefix directory
+# (`looper_<id>/`) can appear anywhere in the tree, and the Playwright
+# browser cache a check run downloads into one is build output, never
+# source. The committed golden images under tests/visual/baselines/ stay
+# tracked.
+looper_*/

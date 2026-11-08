@@ -1,0 +1,95 @@
+{
+  "meta": {
+    "id": "pastoral-creek-0001",
+    "seed": 20261107,
+    "stylePreset": "pastoral-v1",
+    "aspectRatio": "4:3",
+    "version": "1.0.0"
+  },
+  "camera": {
+    "framing": "wide",
+    "lens": "normal",
+    "horizonY": 0.68
+  },
+  "composition": {
+    "focalPoints": ["cottage-1"],
+    "balance": "asymmetric",
+    "negativeSpace": 0.35,
+    "depthLayers": 3
+  },
+  "environment": {
+    "type": "rural",
+    "sky": { "cloudCount": 3 }
+  },
+  "objects": [
+    {
+      "id": "massif-1",
+      "kind": "mountain",
+      "role": "background",
+      "position": { "x": 0.74, "y": 0.68 },
+      "scale": 2,
+      "params": {
+        "width": 340,
+        "height": 220,
+        "secondaryPeaks": 2,
+        "ruggedness": 0.4,
+        "snowCap": 0.45
+      }
+    },
+    {
+      "id": "hill-1",
+      "kind": "hill",
+      "role": "background",
+      "position": { "x": 0.28, "y": 0.7 },
+      "scale": 1.6,
+      "params": {
+        "width": 340,
+        "height": 90,
+        "crestIrregularity": 0.3,
+        "strips": 2
+      }
+    },
+    {
+      "id": "creek-1",
+      "kind": "water",
+      "role": "midground",
+      "position": { "x": 0.5, "y": 0.74 },
+      "scale": 1.4,
+      "params": {
+        "width": 1100,
+        "depth": 80,
+        "waveLines": 6,
+        "waveAmplitude": 3,
+        "calmBand": 0.35
+      }
+    },
+    {
+      "id": "cottage-1",
+      "kind": "house",
+      "role": "focal",
+      "position": { "x": 0.56, "y": 0.9 },
+      "scale": 1.6,
+      "params": {
+        "width": 160,
+        "wallHeight": 85,
+        "roofPitch": 0.8,
+        "windows": 3,
+        "chimney": true,
+        "door": true
+      }
+    },
+    {
+      "id": "tree-1",
+      "kind": "tree",
+      "role": "foreground",
+      "position": { "x": 0.86, "y": 0.95 },
+      "scale": 2.2,
+      "params": {
+        "trunkHeight": 95,
+        "canopyRadius": 62,
+        "canopyLobes": 9,
+        "branchLines": 3
+      }
+    }
+  ]
+}

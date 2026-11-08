@@ -1,0 +1,23 @@
+{
+  "name": "@hatch/gate",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Repository release gates: the example scenes, the golden fixtures, the export paths, and the visual regression suite, over the built packages.",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:visual": "playwright test -c visual/playwright.config.ts",
+    "test:visual:update": "node visual/update-baselines.mjs"
+  },
+  "dependencies": {
+    "@hatch/core": "workspace:*",
+    "@hatch/export": "workspace:*",
+    "@hatch/geometry": "workspace:*",
+    "@hatch/objects": "workspace:*",
+    "@hatch/renderer-svg": "workspace:*"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.0"
+  }
+}

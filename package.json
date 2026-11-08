@@ -1,0 +1,23 @@
+{
+  "name": "hatch",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A deterministic, style-aware vector scene compiler.",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "build": "pnpm -r --if-present run build",
+    "typecheck": "tsc -p tsconfig.json && tsc -p packages/ui/tsconfig.json",
+    "test": "pnpm -r --if-present run test",
+    "verify": "node scripts/verify.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  }
+}
